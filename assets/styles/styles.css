@@ -1,0 +1,100 @@
+html,
+body {
+  height: 100%;
+  font-family: monospace;
+}
+
+body {
+  line-height: 1.4;
+  font-size: 1.2rem;
+}
+
+.hidden {
+  display: none;
+}
+
+p {
+  word-wrap: break-word;
+  white-space: normal;
+  margin-bottom: 20px;
+}
+
+::selection {
+  background: none;
+}
+
+#screen--home h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+#screen--home button {
+  padding: 20px 30px;
+  font-size: 1.5rem;
+}
+#screen--home {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  height: 200px;
+  margin: auto;
+  text-align: center;
+}
+
+#screen--game {
+  height: 100%;
+}
+
+#window--text {
+  border: 1px solid black;
+  width: 70%;
+  height: 60%;
+
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  margin: auto;
+  padding: 60px 80px;
+  font-size: 1.2rem;
+}
+
+#save-slots {
+  margin-left: 20px;
+  width: 400px;
+  position: absolute;
+  bottom: 0;
+}
+
+#save-slots td {
+  border: 1px solid black;
+  padding: 10px 5px;
+}
+
+#save-slots td:hover {
+  color: turquoise;
+  cursor: default
+}
+
+@media only screen and (max-width: 769px) {
+  #window--text {
+    border: 1px solid black;
+    width: 90%;
+    height: 60%;
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    margin: auto;
+    padding: 30px 20px;
+    font-size: 1.2rem;
+  }
+}

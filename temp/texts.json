@@ -1,0 +1,16 @@
+{
+  "texts": [
+    {
+      "sentences": [
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        "Tempus imperdiet nulla malesuada pellentesque elit eget gravida."
+      ]
+    },
+    {
+      "sentences": ["In nisl nisi scelerisque eu ultrices vitae auctor.", "Lorem ipsum dolor sit amet consectetur adipiscing elit ut.", "Mus mauris vitae ultricies leo integer malesuada nunc vel risus mi tempus imperdiet nulla malesuada."]
+    },
+    {
+      "sentences": ["A tumultuous roar could be heard, like the crash of lightning. The metal bars creaked; yelled. The ground tilted and the ceiling began to collapse. Fujino blankly stared at the building that was about to give way. The girl who was on top of her fell away as the world suddenly tilted. There was a storm outside, with the ocean below. If she fell without being able to grab onto something, she would surely die. Fujino took command of that body of hers that was even having trouble breathing. She told it that this place was going to collapse, so she had to get away from here."]
+    }
+  ]
+}
