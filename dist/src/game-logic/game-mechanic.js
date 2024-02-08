@@ -46,6 +46,7 @@ var Novel = /** @class */ (function () {
     };
     return Novel;
 }());
+var MAX_SLOTS = 3;
 var Series = /** @class */ (function () {
     function Series() {
         if (typeof localStorage.getItem("novelIndex") !== "string") {
@@ -53,7 +54,14 @@ var Series = /** @class */ (function () {
             localStorage.setItem("novelIndex", String(this.novelIndex));
         }
         else {
-            this.novelIndex = Number(localStorage.getItem("paragraphIndex"));
+            this.novelIndex = Number(localStorage.getItem("novelIndex"));
+        }
+        this.savedSlots = Array(MAX_SLOTS).fill(null);
+        for (var i = 0; i < MAX_SLOTS; i++) {
+            var localSlot = localStorage.getItem("slot".concat(i));
+            if (typeof localSlot === "string") {
+                this.savedSlots[i] = JSON.parse(localSlot);
+            }
         }
         this.currentNovel = new Novel(this.novelIndex);
         this.completedNovels = [];
@@ -67,6 +75,26 @@ var Series = /** @class */ (function () {
     };
     Series.prototype.addCompletedNovel = function (value) {
         this.completedNovels.push(new Novel(value));
+    };
+    Series.prototype.addSave = function (slotIndex) {
+        var savedSlot = {
+            novel: this.novelIndex,
+            chapter: this.currentNovel.chapterIndex,
+            paragraph: this.currentNovel.paragraphIndex,
+        };
+        this.savedSlots[slotIndex] = savedSlot;
+        localStorage.setItem("slot".concat(slotIndex), JSON.stringify(savedSlot));
+        return savedSlot;
+    };
+    Series.prototype.removeSave = function (slotIndex) {
+        delete this.savedSlots[slotIndex];
+    };
+    Series.prototype.jumpSave = function (savedSlot) {
+        this.setNovel(savedSlot.novel);
+        this.setCurrentNovel(this.novelIndex);
+        this.currentNovel.setChapter(savedSlot.chapter);
+        this.currentNovel.setParagraph(savedSlot.paragraph);
+        this.currentNovel.sentenceIndex = 0;
     };
     return Series;
 }());
@@ -84,9 +112,9 @@ var Track = /** @class */ (function () {
         this.audio.on("fade", function () {
             _this.audio.pause();
         });
-        this.audio.on("play", function () {
-            console.log(_this.audioId, _this.audio);
-        });
+        // this.audio.on("play", () => {
+        // console.log(this.audioId, this.audio);
+        // });
     }
     return Track;
 }());
@@ -182,7 +210,10 @@ var Soundtrack = /** @class */ (function () {
             this.currentTrackList.clearTrackList();
         }
     };
+    Soundtrack.prototype.pauseAudio = function () {
+        this.currentTrackList.pauseTrackList();
+    };
     return Soundtrack;
 }());
 // export { Novel, Soundtrack };
-export { Series, Soundtrack };
+export { Series, Soundtrack, knk };

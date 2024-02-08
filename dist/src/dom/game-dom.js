@@ -1,5 +1,5 @@
-// import { Novel, Soundtrack } from "../game-logic/game-mechanic";
-import { Series, Soundtrack } from "../game-logic/game-mechanic";
+// Consider making a DOM init that initiates what to display
+import { Series, Soundtrack, knk } from "../game-logic/game-mechanic";
 var series = new Series();
 var soundtrack = new Soundtrack(series.novelIndex);
 var GameDOM = (function () {
@@ -9,6 +9,7 @@ var GameDOM = (function () {
     var textContainerIndex = 0;
     var playing = false;
     var running = false;
+    var charAt = 0;
     var playGame = function () {
         GameDOM.playing = true;
         GameDOM.gameScreen.classList.toggle("hidden");
@@ -25,22 +26,20 @@ var GameDOM = (function () {
         GameDOM.textContainerIndex = 0;
     };
     var typeWriter = function (text) {
-        var j = 0;
-        var go = function (text) {
-            GameDOM.running = true;
-            if (j < text.length) {
-                textContainer.children["".concat(GameDOM.textContainerIndex)].innerHTML +=
-                    text[j];
-                j++;
-                setTimeout(function () { return go(text); }, textSpeed);
-            }
-            if (j === text.length) {
-                textContainer.children["".concat(GameDOM.textContainerIndex)].innerHTML +=
-                    " ";
-                GameDOM.running = false;
-            }
-        };
-        go(text);
+        GameDOM.running = true;
+        if (GameDOM.charAt < text.length) {
+            textContainer.children["".concat(GameDOM.textContainerIndex)].innerHTML +=
+                text[GameDOM.charAt];
+            GameDOM.charAt++;
+            setTimeout(function () { return typeWriter(text); }, GameDOM.textSpeed);
+        }
+        else if (GameDOM.charAt === text.length) {
+            textContainer.children["".concat(GameDOM.textContainerIndex)].innerHTML += " ";
+            GameDOM.running = false;
+            GameDOM.charAt = 0;
+            GameDOM.textSpeed = 18;
+        }
+        //
     };
     return {
         gameScreen: gameScreen,
@@ -48,6 +47,8 @@ var GameDOM = (function () {
         textContainerIndex: textContainerIndex,
         running: running,
         playing: playing,
+        charAt: charAt,
+        textSpeed: textSpeed,
         startGame: startGame,
         continueGame: continueGame,
         clearText: clearText,
@@ -64,11 +65,11 @@ var ParagraphJump = (function () {
         GameDOM.textContainer.appendChild(document.createElement("p"));
         series.setNovel(Number(inputNovel.value));
         series.setCurrentNovel(series.novelIndex);
+        soundtrack.pauseAudio();
         soundtrack = new Soundtrack(series.novelIndex);
         series.currentNovel.setChapter(Number(inputChapter.value));
         series.currentNovel.setParagraph(Number(inputParagraph.value));
         series.currentNovel.sentenceIndex = 0;
-        console.log(series.novelIndex, series.currentNovel.chapterIndex, series.currentNovel.paragraphIndex);
     };
     buttonElt.addEventListener("click", jump);
 })();
@@ -76,7 +77,6 @@ var GameWindow = (function () {
     var gameWindow = document.getElementById("window--text");
     gameWindow.addEventListener("click", function () {
         if (GameDOM.playing) {
-            // The GameDOM.running condition is used to prevent the typeWriter function to be executed while it itself is being executed. This is a temporary solution -- the program should be able to finish the current sentence quickly when the user clicks a second time.
             if (!GameDOM.running) {
                 var windowVertPadding = 2 *
                     Number(window.getComputedStyle(gameWindow).paddingTop.slice(0, -2));
@@ -85,12 +85,14 @@ var GameWindow = (function () {
                 series.currentNovel.setCurrentChapter(series.currentNovel.chapterIndex);
                 series.currentNovel.setCurrentParagraph(series.currentNovel.paragraphIndex);
                 // Starts a new paragraph element if we've gone out of sentenceIndex
-                if (series.currentNovel.sentenceIndex >= series.currentNovel.currentParagraph.length) {
+                if (series.currentNovel.sentenceIndex >=
+                    series.currentNovel.currentParagraph.length) {
                     series.currentNovel.sentenceIndex = 0;
                     series.currentNovel.setParagraph(series.currentNovel.paragraphIndex + 1);
                     GameDOM.textContainerIndex++;
                     // Checks if starting a new paragraph would be out of paragraphIndex for the current chapter
-                    if (series.currentNovel.paragraphIndex >= series.currentNovel.currentChapter.length) {
+                    if (series.currentNovel.paragraphIndex >=
+                        series.currentNovel.currentChapter.length) {
                         series.currentNovel.sentenceIndex = 0;
                         series.currentNovel.setParagraph(0);
                         series.currentNovel.setChapter(series.currentNovel.chapterIndex + 1);
@@ -127,6 +129,7 @@ var GameWindow = (function () {
                         series.currentNovel.setCurrentParagraph(series.currentNovel.paragraphIndex);
                         GameDOM.textContainer.appendChild(document.createElement("p"));
                     }
+                    // Load the audio and display the current sentence
                     soundtrack.playAudio(series.currentNovel.currentParagraphObject);
                     GameDOM.typeWriter(series.currentNovel.currentParagraph[series.currentNovel.sentenceIndex]);
                     series.currentNovel.sentenceIndex++;
@@ -138,7 +141,87 @@ var GameWindow = (function () {
                     GameDOM.playing = false;
                 }
             }
+            else {
+                GameDOM.textSpeed = 5;
+            }
         }
     });
 })();
-export { GameDOM, GameWindow, ParagraphJump };
+var SaveDOM = (function () {
+    var saveBtn = document.getElementById("button--save");
+    var loadBtn = document.getElementById("button--load");
+    var savedSlotsElt = document
+        .getElementById("save-slots")
+        .getElementsByTagName("td");
+    var saveSectionElt = document.getElementById("section--save");
+    var defaultMessage = "waiting for action...";
+    saveSectionElt.lastChild.textContent = defaultMessage;
+    var isSaving = false;
+    var isLoading = false;
+    saveBtn.addEventListener("click", function () {
+        saveSectionElt.lastChild.textContent = "Select a slot below";
+        isSaving = true;
+    });
+    loadBtn.addEventListener("click", function () {
+        saveSectionElt.lastChild.textContent = "Select a slot below";
+        isLoading = true;
+    });
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+            if (isSaving) {
+                isSaving = false;
+            }
+            else if (isLoading) {
+                isLoading = false;
+            }
+            saveSectionElt.lastChild.textContent = defaultMessage;
+        }
+    });
+    var _loop_1 = function (i) {
+        savedSlotsElt[i].addEventListener("click", function () {
+            if (isSaving) {
+                series.addSave(i);
+                console.log(series.savedSlots);
+                var novelObj = knk[series.savedSlots[i].novel];
+                var title = novelObj.title;
+                var chapterIndex = series.savedSlots[i].chapter;
+                var paragraphIndex = series.savedSlots[i].paragraph;
+                savedSlotsElt[i].textContent = "".concat(title, " - Chapter ").concat(chapterIndex);
+                isSaving = false;
+                saveSectionElt.lastChild.textContent = defaultMessage;
+            }
+            else if (isLoading) {
+                console.log("loading clicked");
+                GameDOM.clearText();
+                GameDOM.textContainer.appendChild(document.createElement("p"));
+                series.jumpSave(series.savedSlots[i]);
+                soundtrack.pauseAudio();
+                soundtrack = new Soundtrack(series.novelIndex);
+                isLoading = false;
+                saveSectionElt.lastChild.textContent = defaultMessage;
+            }
+        });
+    };
+    for (var i = 0; i < savedSlotsElt.length; i++) {
+        _loop_1(i);
+    }
+})();
+var InitDOM = (function () {
+    // Display saved slots
+    var savedSlotsElt = document
+        .getElementById("save-slots")
+        .getElementsByTagName("td");
+    for (var i = 0; i < series.savedSlots.length; i++) {
+        if (series.savedSlots[i] === null) {
+            savedSlotsElt[i].textContent = "empty";
+        }
+        else {
+            var novelObj = knk[series.savedSlots[i].novel];
+            var title = novelObj.title;
+            var chapterIndex = series.savedSlots[i].chapter;
+            var paragraphIndex = series.savedSlots[i].paragraph;
+            savedSlotsElt[i].textContent = "".concat(title, " - Chapter ").concat(chapterIndex);
+        }
+    }
+})();
+export { GameDOM };

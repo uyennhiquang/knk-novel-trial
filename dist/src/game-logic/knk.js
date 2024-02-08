@@ -1,6 +1,7 @@
 var knk = [
     {
-        title: "overlooking-view",
+        title: "Overlooking View",
+        id: "overlooking-view",
         chapters: [
             {
                 texts: [
@@ -3821,7 +3822,8 @@ var knk = [
         ],
     },
     {
-        title: "murder-speculation-1",
+        "title": "Murder Speculation (first half)",
+        id: "murder-speculation-1",
         chapters: [
             {
                 texts: [

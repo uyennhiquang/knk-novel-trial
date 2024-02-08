@@ -1,4 +1,7 @@
 // Consider making a DOM init that initiates what to display
+// BUGS
+// On novel 1, chapter 3, paragraph 197, when trying to skip blank paragraphs at the end of a chapter, it leads to a out-of-index bug
+
 import { Series, Soundtrack, knk } from "../game-logic/game-mechanic";
 
 const series = new Series();
@@ -175,11 +178,34 @@ const GameWindow = (() => {
             GameDOM.clearText();
 
             series.currentNovel.sentenceIndex = 0;
-            series.currentNovel.setParagraph(
-              series.currentNovel.paragraphIndex + 1
-            );
+
+            let newParagraphIndex: number =
+              series.currentNovel.paragraphIndex + 1;
+            let newChapterIndex: number = series.currentNovel.chapterIndex;
+            let newNovelIndex: number = series.novelIndex;
+
+            if (
+              newParagraphIndex >= series.currentNovel.currentChapter.length
+            ) {
+              newParagraphIndex = 0;
+              newChapterIndex = series.currentNovel.chapterIndex + 1;
+
+              if (newChapterIndex >= series.currentNovel.chapters.length) {
+                newChapterIndex = 0;
+                newNovelIndex = series.novelIndex + 1;
+              }
+            }
             GameDOM.textContainerIndex = 0;
 
+            series.setNovel(newNovelIndex);
+            series.setCurrentNovel(series.novelIndex);
+
+            series.currentNovel.setChapter(newChapterIndex);
+            series.currentNovel.setCurrentChapter(
+              series.currentNovel.chapterIndex
+            );
+
+            series.currentNovel.setParagraph(newParagraphIndex);
             series.currentNovel.setCurrentParagraph(
               series.currentNovel.paragraphIndex
             );
@@ -259,7 +285,6 @@ const SaveDOM = (() => {
         savedSlotsElt[i].textContent = `${title} - Chapter ${chapterIndex}`;
         isSaving = false;
         saveSectionElt.lastChild.textContent = defaultMessage;
-
       } else if (isLoading) {
         console.log("loading clicked");
         GameDOM.clearText();

@@ -1,5 +1,6 @@
 # assets
 assets/music
+*.zip
 
 # Logs
 logs
