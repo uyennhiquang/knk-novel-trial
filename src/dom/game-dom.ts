@@ -257,7 +257,11 @@ const SaveDOM = (() => {
         const paragraphIndex = series.savedSlots[i].paragraph;
 
         savedSlotsElt[i].textContent = `${title} - Chapter ${chapterIndex}`;
+        isSaving = false;
+        saveSectionElt.lastChild.textContent = defaultMessage;
+
       } else if (isLoading) {
+        console.log("loading clicked");
         GameDOM.clearText();
         GameDOM.textContainer.appendChild(document.createElement("p"));
 
@@ -265,6 +269,9 @@ const SaveDOM = (() => {
 
         soundtrack.pauseAudio();
         soundtrack = new Soundtrack(series.novelIndex);
+
+        isLoading = false;
+        saveSectionElt.lastChild.textContent = defaultMessage;
       }
     });
   }
