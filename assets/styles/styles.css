@@ -1,3 +1,16 @@
+/* dark mode*/
+:root.dark {
+  --base-bg: #161923;
+  --base-text-color: #bbb9c6;
+  --base-link-color: #8ff0a4;
+}
+
+:root.light {
+  --base-bg: #fff;
+  --base-text-color: #161923;
+  --base-link-color: #4f239f;
+}
+
 html,
 body {
   height: 100%;
@@ -7,6 +20,8 @@ body {
 body {
   line-height: 1.4;
   font-size: 1.2rem;
+  background-color: var(--base-bg);
+  color: var(--base-text-color)
 }
 
 .hidden {
@@ -49,7 +64,7 @@ p {
 }
 
 #window--text {
-  border: 1px solid black;
+  border: 1px solid var(--base-text-color);
   width: 70%;
   height: 60%;
 
@@ -72,18 +87,18 @@ p {
 }
 
 #save-slots td {
-  border: 1px solid black;
+  border: 1px solid var(--base-text-color);
   padding: 10px 5px;
 }
 
 #save-slots td:hover {
-  color: turquoise;
+  color: var(--base-link-color);
   cursor: default
 }
 
 @media only screen and (max-width: 769px) {
   #window--text {
-    border: 1px solid black;
+    border: 1px solid var(--base-text-color);
     width: 90%;
     height: 60%;
 
