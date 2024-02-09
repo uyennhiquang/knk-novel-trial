@@ -238,7 +238,9 @@ const GameWindow = (() => {
   document.addEventListener("keydown", (e) => {
     const SPACE = " ";
     const DOWN = "ArrowDown";
-    if (GameDOM.playing && (e.key == SPACE || e.key == DOWN)) {
+    const ENTER = "Enter";
+
+    if (GameDOM.playing && (e.key == SPACE || e.key == DOWN) || e.key == ENTER) {
       // console.log(e);
       playGame();
     }
