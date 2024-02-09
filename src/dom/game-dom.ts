@@ -99,8 +99,7 @@ const ParagraphJump = (() => {
 
 const GameWindow = (() => {
   const gameWindow = document.getElementById("window--text");
-
-  gameWindow.addEventListener("click", () => {
+  const playGame = () => {
     if (GameDOM.playing) {
       if (!GameDOM.running) {
         const windowVertPadding =
@@ -232,6 +231,16 @@ const GameWindow = (() => {
       } else {
         GameDOM.textSpeed = 5;
       }
+    }
+  };
+
+  gameWindow.addEventListener("click", playGame);
+  document.addEventListener("keydown", (e) => {
+    const SPACE = " ";
+    const DOWN = "ArrowDown";
+    if (GameDOM.playing && (e.key == SPACE || e.key == DOWN)) {
+      // console.log(e);
+      playGame();
     }
   });
 })();
