@@ -71,6 +71,10 @@ class Novel {
     this.currentParagraph = this.currentChapter[value].sentences;
     this.currentParagraphObject = this.currentChapter[value];
   }
+
+  nextParagraph(): void {
+
+  }
 }
 
 const MAX_SLOTS = 3;
