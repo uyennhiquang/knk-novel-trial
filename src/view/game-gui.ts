@@ -213,14 +213,8 @@ const GameWindow = (() => {
 
           // Load the audio and display the current sentence
           soundtrack.playAudio(series.currentNovel.currentParagraphObject);
-          // GameDOM.typeWriter(
-          //   series.currentNovel.currentParagraph[
-          //     series.currentNovel.sentenceIndex
-          //   ]
-          // );
           series.nextParagraph();
 
-          series.currentNovel.sentenceIndex++;
         } else {
           GameDOM.clearText();
           GameDOM.textContainer.appendChild(document.createElement("p"));

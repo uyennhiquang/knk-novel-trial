@@ -120,6 +120,8 @@ class Series {
     GameDOM.typeWriter(
       this.currentNovel.currentParagraph[this.currentNovel.sentenceIndex]
     );
+
+    this.currentNovel.sentenceIndex++;
   }
 
   addCompletedNovel(value: number): void {
