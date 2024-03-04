@@ -1,5 +1,6 @@
 import { Howl } from "howler";
-import { knk } from "./knk";
+import { knk } from "./novel";
+import { GameDOM } from "../view/game-gui";
 
 // Edit line "A person doesn't kill herself without wouldn't kill themselves." in the novel + database
 type ParagraphText = string[];
@@ -71,10 +72,6 @@ class Novel {
     this.currentParagraph = this.currentChapter[value].sentences;
     this.currentParagraphObject = this.currentChapter[value];
   }
-
-  nextParagraph(): void {
-
-  }
 }
 
 const MAX_SLOTS = 3;
@@ -117,6 +114,12 @@ class Series {
 
   setCurrentNovel(value: number): void {
     this.currentNovel = new Novel(value);
+  }
+
+  nextParagraph(): void {
+    GameDOM.typeWriter(
+      this.currentNovel.currentParagraph[this.currentNovel.sentenceIndex]
+    );
   }
 
   addCompletedNovel(value: number): void {

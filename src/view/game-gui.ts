@@ -2,7 +2,7 @@
 // BUGS
 // On novel 1, chapter 3, paragraph 197, when trying to skip blank paragraphs at the end of a chapter, it leads to a out-of-index bug
 
-import { Series, Soundtrack, knk } from "../game-logic/game-mechanic";
+import { Series, Soundtrack, knk } from "../model/knk";
 
 const series = new Series();
 let soundtrack = new Soundtrack(series.novelIndex);
@@ -213,11 +213,12 @@ const GameWindow = (() => {
 
           // Load the audio and display the current sentence
           soundtrack.playAudio(series.currentNovel.currentParagraphObject);
-          GameDOM.typeWriter(
-            series.currentNovel.currentParagraph[
-              series.currentNovel.sentenceIndex
-            ]
-          );
+          // GameDOM.typeWriter(
+          //   series.currentNovel.currentParagraph[
+          //     series.currentNovel.sentenceIndex
+          //   ]
+          // );
+          series.nextParagraph();
 
           series.currentNovel.sentenceIndex++;
         } else {

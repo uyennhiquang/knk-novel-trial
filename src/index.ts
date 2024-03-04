@@ -1,4 +1,4 @@
-import { GameDOM } from "./dom/game-dom"
+import { GameDOM } from "./view/game-gui"
 
 import "../assets/styles/reset.css";
 import "../assets/styles/styles.css";
