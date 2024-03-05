@@ -39,7 +39,7 @@ const GameDOM = (() => {
   };
 
   /**
-   * 
+   * The typeWriter() function works by using setTimeout() to call it in interval -- each time typeWriter() is called it adds 1 letter to the specific <p> (indicated by textContainerIndex) inside the textContainer div.
    * @param text sentence text
    */
   const typeWriter = (text: string): void => {
