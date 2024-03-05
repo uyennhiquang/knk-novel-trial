@@ -34,12 +34,6 @@ class Novel {
     this.chapterIndex = null;
     this.paragraphIndex = null;
 
-    // fetch("http://localhost:3001/knk")
-    // .then((response) => response.json())
-    // .then((json) => {
-    // this.chapters = json[novelIndex]["chapters"];
-    // });
-
     if (typeof localStorage.getItem("paragraphIndex") !== "string") {
       this.paragraphIndex = 0;
       localStorage.setItem("paragraphIndex", String(this.paragraphIndex));
@@ -52,6 +46,10 @@ class Novel {
     } else {
       this.chapterIndex = Number(localStorage.getItem("chapterIndex"));
     }
+
+    // Initializes the current chapter and paragraph upon creating a Novel instance
+    this.setCurrentChapter(this.chapterIndex);
+    this.setCurrentParagraph(this.paragraphIndex);
   }
 
   setParagraph(value: number): void {

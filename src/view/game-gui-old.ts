@@ -8,14 +8,6 @@ import { Series, Soundtrack, knk } from "../model/knk";
 const series = new Series();
 let soundtrack = new Soundtrack(series.novelIndex);
 
-console.log(
-  "Novel:", series.novelIndex, "\n",
-  "Chapter:", series.currentNovel.chapterIndex, "\n",
-  "Paragraph Position:", series.currentNovel.paragraphIndex, "\n",
-  "Sentence Position:", series.currentNovel.sentenceIndex, "\n",
-  "Current sentence:", series.currentNovel.currentParagraph[series.currentNovel.sentenceIndex]
-  );
-
 const GameDOM = (() => {
   const gameScreen = document.getElementById("screen--game");
   const textContainer = document.getElementById("container--text");
@@ -39,16 +31,7 @@ const GameDOM = (() => {
 
     series.currentNovel.sentenceIndex = 0;
   };
-
-  // const continueGame = playGame;
-  const continueGame = () => {
-    playGame();
-    // series.currentNovel.setChapter(0);
-    // series.currentNovel.setParagraph(0);
-
-    series.currentNovel.sentenceIndex = 0;
-
-  };
+  const continueGame = playGame;
 
   const clearText = () => {
     textContainer.replaceChildren();
@@ -80,7 +63,6 @@ const GameDOM = (() => {
       GameDOM.textSpeed = 18;
     }
   };
-
 
   return {
     gameScreen,
@@ -154,8 +136,96 @@ const GameWindow = (() => {
   const playGame = () => {
     if (GameDOM.playing) {
       if (!GameDOM.running) {
-        series.nextParagraph();
+        series.currentNovel.setCurrentChapter(series.currentNovel.chapterIndex);
+        series.currentNovel.setCurrentParagraph(
+          series.currentNovel.paragraphIndex
+        );
 
+        // ALREADY ADDED
+        // Starts a new paragraph element if we've gone out of sentenceIndex
+        if (
+          series.currentNovel.sentenceIndex >=
+          series.currentNovel.currentParagraph.length
+        ) {
+          series.currentNovel.sentenceIndex = 0;
+          series.currentNovel.setParagraph(
+            series.currentNovel.paragraphIndex + 1
+          );
+          GameDOM.setTextContainerIndex(GameDOM.getTextContainerIndex() + 1);
+
+          // Checks if starting a new paragraph would be out of paragraphIndex for the current chapter
+          if (
+            series.currentNovel.paragraphIndex >=
+            series.currentNovel.currentChapter.length
+          ) {
+            series.currentNovel.sentenceIndex = 0;
+            series.currentNovel.setParagraph(0);
+            series.currentNovel.setChapter(
+              series.currentNovel.chapterIndex + 1
+            );
+
+            GameDOM.clearText();
+          }
+        }
+        // ALREADY ADDED
+
+        if (
+          series.currentNovel.chapterIndex < series.currentNovel.chapters.length
+        ) {
+          series.currentNovel.setCurrentChapter(
+            series.currentNovel.chapterIndex
+          );
+          series.currentNovel.setCurrentParagraph(
+            series.currentNovel.paragraphIndex
+          );
+
+          // Checks if adding the current paragraph would cause the text to overflow by adding a "ghost" p element (that is to be deleted later), then calculating the total textContainer height.
+          if (series.currentNovel.sentenceIndex === 0) {
+            checkForParagraphOverflow();
+          }
+
+          // A byproduct of the auto-generated JSON -- the Python script that generates our data uses regex on each line. Thus, if it matches an empty line for example, we will get an empty array. This will cause issues when we try to index our empty currentParagraph. The code in this while loop ensures it'll never happen -- it first clears the screen (denoting a page flip) and hops to the next paragraph until the current paragraph isn't empty.
+          while (series.currentNovel.currentParagraph.length === 0) {
+            GameDOM.clearText();
+
+            series.currentNovel.sentenceIndex = 0;
+
+            let newParagraphIndex: number =
+              series.currentNovel.paragraphIndex + 1;
+            let newChapterIndex: number = series.currentNovel.chapterIndex;
+            let newNovelIndex: number = series.novelIndex;
+
+            if (
+              newParagraphIndex >= series.currentNovel.currentChapter.length
+            ) {
+              newParagraphIndex = 0;
+              newChapterIndex = series.currentNovel.chapterIndex + 1;
+
+              if (newChapterIndex >= series.currentNovel.chapters.length) {
+                newChapterIndex = 0;
+                newNovelIndex = series.novelIndex + 1;
+              }
+            }
+            GameDOM.setTextContainerIndex(0);
+
+            series.setNovel(newNovelIndex);
+            series.setCurrentNovel(series.novelIndex);
+
+            series.currentNovel.setChapter(newChapterIndex);
+            series.currentNovel.setCurrentChapter(
+              series.currentNovel.chapterIndex
+            );
+
+            series.currentNovel.setParagraph(newParagraphIndex);
+            series.currentNovel.setCurrentParagraph(
+              series.currentNovel.paragraphIndex
+            );
+            GameDOM.textContainer.appendChild(document.createElement("p"));
+          }
+
+          // Load the audio and display the current sentence
+          soundtrack.playAudio(series.currentNovel.currentParagraphObject);
+          series.nextParagraph();
         } else {
           GameDOM.clearText();
           GameDOM.textContainer.appendChild(document.createElement("p"));
@@ -168,7 +238,7 @@ const GameWindow = (() => {
         GameDOM.textSpeed = 5;
       }
     }
-  // };
+  };
 
   gameWindow.addEventListener("click", playGame);
   document.addEventListener("keydown", (e) => {
@@ -271,7 +341,5 @@ const InitDOM = (() => {
     }
   }
 })();
-
-
 
 export { GameDOM };
