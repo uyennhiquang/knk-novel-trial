@@ -35,8 +35,13 @@ const GameDOM = (() => {
 
   const clearText = () => {
     textContainer.replaceChildren();
-    GameDOM.textContainerIndex = 0;
+    textContainerIndex = 0;
   };
+
+  const setTextContainerIndex = (index: number) => {
+    textContainerIndex = index;
+  }
+  const getTextContainerIndex = ():number => textContainerIndex;
 
   /**
    * The typeWriter() function works by using setTimeout() to call it in interval -- each time typeWriter() is called it adds 1 letter to the specific <p> (indicated by textContainerIndex) inside the textContainer div.
@@ -46,12 +51,12 @@ const GameDOM = (() => {
     GameDOM.running = true;
 
     if (charAt < text.length) {
-      textContainer.children[`${GameDOM.textContainerIndex}`].innerHTML +=
+      textContainer.children[`${textContainerIndex}`].innerHTML +=
         text[charAt];
       charAt++;
       setTimeout(() => typeWriter(text), GameDOM.textSpeed);
     } else if (charAt === text.length) {
-      textContainer.children[`${GameDOM.textContainerIndex}`].innerHTML += " ";
+      textContainer.children[`${textContainerIndex}`].innerHTML += " ";
 
       GameDOM.running = false;
       charAt = 0;
@@ -63,7 +68,6 @@ const GameDOM = (() => {
   return {
     gameScreen,
     textContainer,
-    textContainerIndex,
     running,
     playing,
     textSpeed,
@@ -72,6 +76,8 @@ const GameDOM = (() => {
     continueGame,
     clearText,
     typeWriter,
+    getTextContainerIndex,
+    setTextContainerIndex
   };
 })();
 
@@ -146,7 +152,7 @@ const GameWindow = (() => {
           series.currentNovel.setParagraph(
             series.currentNovel.paragraphIndex + 1
           );
-          GameDOM.textContainerIndex++;
+          GameDOM.setTextContainerIndex(GameDOM.getTextContainerIndex() + 1);
 
           // Checks if starting a new paragraph would be out of paragraphIndex for the current chapter
           if (
@@ -201,7 +207,7 @@ const GameWindow = (() => {
                 newNovelIndex = series.novelIndex + 1;
               }
             }
-            GameDOM.textContainerIndex = 0;
+            GameDOM.setTextContainerIndex(0);
 
             series.setNovel(newNovelIndex);
             series.setCurrentNovel(series.novelIndex);
