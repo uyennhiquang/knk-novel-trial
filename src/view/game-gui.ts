@@ -1,6 +1,7 @@
 // Consider making a DOM init that initiates what to display
 // BUGS
 // On novel 1, chapter 3, paragraph 197, when trying to skip blank paragraphs at the end of a chapter, it leads to a out-of-index bug
+// Game does not move on to the next novel once reaching the end
 
 import { Series, Soundtrack, knk } from "../model/knk";
 
@@ -11,6 +12,7 @@ const GameDOM = (() => {
   const gameScreen = document.getElementById("screen--game");
   const textContainer = document.getElementById("container--text");
 
+  // Consider encapsulating these by making functions that update these states, but not exposing them
   let textSpeed = 18;
   let textContainerIndex = 0;
   let playing = false;
@@ -36,19 +38,23 @@ const GameDOM = (() => {
     GameDOM.textContainerIndex = 0;
   };
 
+  /**
+   * 
+   * @param text sentence text
+   */
   const typeWriter = (text: string): void => {
     GameDOM.running = true;
 
-    if (GameDOM.charAt < text.length) {
+    if (charAt < text.length) {
       textContainer.children[`${GameDOM.textContainerIndex}`].innerHTML +=
-        text[GameDOM.charAt];
-      GameDOM.charAt++;
+        text[charAt];
+      charAt++;
       setTimeout(() => typeWriter(text), GameDOM.textSpeed);
-    } else if (GameDOM.charAt === text.length) {
+    } else if (charAt === text.length) {
       textContainer.children[`${GameDOM.textContainerIndex}`].innerHTML += " ";
 
       GameDOM.running = false;
-      GameDOM.charAt = 0;
+      charAt = 0;
       GameDOM.textSpeed = 18;
     }
     //
@@ -60,7 +66,6 @@ const GameDOM = (() => {
     textContainerIndex,
     running,
     playing,
-    charAt,
     textSpeed,
 
     startGame,
@@ -99,21 +104,39 @@ const ParagraphJump = (() => {
 
 const GameWindow = (() => {
   const gameWindow = document.getElementById("window--text");
+  const windowVertPadding =
+    2 * Number(window.getComputedStyle(gameWindow).paddingTop.slice(0, -2));
+  const roomError = 10;
+  const MAX_CONTAINER_HEIGHT =
+    gameWindow.offsetHeight - windowVertPadding - roomError;
+
+  const checkForParagraphOverflow = () => {
+    if (GameDOM.textContainer.children.length > 0) {
+      const p = document.createElement("p");
+      const currentParagraphStr = series.currentNovel.currentParagraph
+        .map((sentence) => `${sentence}`)
+        .join(" ");
+      p.innerHTML = currentParagraphStr;
+      GameDOM.textContainer.appendChild(p);
+
+      if (GameDOM.textContainer.offsetHeight >= MAX_CONTAINER_HEIGHT) {
+        GameDOM.clearText();
+      } else {
+        GameDOM.textContainer.removeChild(GameDOM.textContainer.lastChild);
+      }
+    }
+
+    GameDOM.textContainer.appendChild(document.createElement("p"));
+  };
   const playGame = () => {
     if (GameDOM.playing) {
       if (!GameDOM.running) {
-        const windowVertPadding =
-          2 *
-          Number(window.getComputedStyle(gameWindow).paddingTop.slice(0, -2));
-        const roomError = 10;
-        const MAX_CONTAINER_HEIGHT =
-          gameWindow.offsetHeight - windowVertPadding - roomError;
-
         series.currentNovel.setCurrentChapter(series.currentNovel.chapterIndex);
         series.currentNovel.setCurrentParagraph(
           series.currentNovel.paragraphIndex
         );
 
+        // ALREADY ADDED
         // Starts a new paragraph element if we've gone out of sentenceIndex
         if (
           series.currentNovel.sentenceIndex >=
@@ -139,6 +162,7 @@ const GameWindow = (() => {
             GameDOM.clearText();
           }
         }
+        // ALREADY ADDED
 
         if (
           series.currentNovel.chapterIndex < series.currentNovel.chapters.length
@@ -152,24 +176,7 @@ const GameWindow = (() => {
 
           // Checks if adding the current paragraph would cause the text to overflow by adding a "ghost" p element (that is to be deleted later), then calculating the total textContainer height.
           if (series.currentNovel.sentenceIndex === 0) {
-            if (GameDOM.textContainer.children.length > 0) {
-              const p = document.createElement("p");
-              const currentParagraphStr = series.currentNovel.currentParagraph
-                .map((sentence) => `${sentence}`)
-                .join(" ");
-              p.innerHTML = currentParagraphStr;
-              GameDOM.textContainer.appendChild(p);
-
-              if (GameDOM.textContainer.offsetHeight >= MAX_CONTAINER_HEIGHT) {
-                GameDOM.clearText();
-              } else {
-                GameDOM.textContainer.removeChild(
-                  GameDOM.textContainer.lastChild
-                );
-              }
-            }
-
-            GameDOM.textContainer.appendChild(document.createElement("p"));
+            checkForParagraphOverflow();
           }
 
           // A byproduct of the auto-generated JSON -- the Python script that generates our data uses regex on each line. Thus, if it matches an empty line for example, we will get an empty array. This will cause issues when we try to index our empty currentParagraph. The code in this while loop ensures it'll never happen -- it first clears the screen (denoting a page flip) and hops to the next paragraph until the current paragraph isn't empty.
@@ -214,7 +221,6 @@ const GameWindow = (() => {
           // Load the audio and display the current sentence
           soundtrack.playAudio(series.currentNovel.currentParagraphObject);
           series.nextParagraph();
-
         } else {
           GameDOM.clearText();
           GameDOM.textContainer.appendChild(document.createElement("p"));
@@ -235,7 +241,10 @@ const GameWindow = (() => {
     const DOWN = "ArrowDown";
     const ENTER = "Enter";
 
-    if (GameDOM.playing && (e.key == SPACE || e.key == DOWN) || e.key == ENTER) {
+    if (
+      (GameDOM.playing && (e.key == SPACE || e.key == DOWN)) ||
+      e.key == ENTER
+    ) {
       // console.log(e);
       playGame();
     }

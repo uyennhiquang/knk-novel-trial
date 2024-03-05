@@ -117,12 +117,46 @@ class Series {
   }
 
   nextParagraph(): void {
+    // Setting the current chapter and current paragraph after incrementing (fixing order later)
+    // this.currentNovel.setCurrentChapter(this.currentNovel.chapterIndex);
+    // this.currentNovel.setCurrentParagraph(this.currentNovel.paragraphIndex);
+
+    // Starts a new paragraph element if we've gone out of sentenceIndex, aka making a new p tag
+    // if (
+    //   this.currentNovel.sentenceIndex >=
+    //   this.currentNovel.currentParagraph.length
+    // ) {
+    //   this.currentNovel.sentenceIndex = 0;
+    //   this.currentNovel.setParagraph(this.currentNovel.paragraphIndex + 1);
+    //   GameDOM.textContainerIndex++;
+
+      // Checks if starting a new paragraph would be out of paragraphIndex for the current chapter
+    //   if (
+    //     this.currentNovel.paragraphIndex >=
+    //     this.currentNovel.currentChapter.length
+    //   ) {
+    //     this.currentNovel.sentenceIndex = 0;
+    //     this.currentNovel.setParagraph(0);
+    //     this.currentNovel.setChapter(this.currentNovel.chapterIndex + 1);
+
+    //     GameDOM.clearText();
+    //   }
+    // }
+
+    
+
+    // Display text by calling the GameDOM observer's controller
     GameDOM.typeWriter(
       this.currentNovel.currentParagraph[this.currentNovel.sentenceIndex]
     );
 
     this.currentNovel.sentenceIndex++;
   }
+
+  // isGaveOver(): boolean {
+  //   return this.curr
+  // }
+
 
   addCompletedNovel(value: number): void {
     this.completedNovels.push(new Novel(value));
