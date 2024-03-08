@@ -1,7 +1,7 @@
 // Consider making a DOM init that initiates what to display
 // BUGS
 // On novel 1, chapter 3, paragraph 197, when trying to skip blank paragraphs at the end of a chapter, it leads to a out-of-index bug
-// Game does not move on to the next novel once reaching the end (?)
+// Game doesn't properly show the ending message once reach the end of the last novel
 
 import { Series, Soundtrack, knk } from "../model/knk";
 
@@ -134,7 +134,7 @@ const ParagraphJump = (() => {
     GameDOM.textContainer.appendChild(document.createElement("p"));
 
     series.setNovel(Number(inputNovel.value));
-    series.setCurrentNovel(series.novelIndex);
+    series.setCurrentNovel();
 
     soundtrack.pauseAudio();
     soundtrack = new Soundtrack(series.novelIndex);
@@ -198,6 +198,7 @@ const GameWindow = (() => {
           GameDOM.speedUp();
         }
       } else {
+        console.log
         GameDOM.clearText();
         GameDOM.textContainer.appendChild(document.createElement("p"));
         GameDOM.typeWriter(

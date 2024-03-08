@@ -132,8 +132,8 @@ class Series {
     localStorage.setItem("novelIndex", String(this.novelIndex));
   }
 
-  setCurrentNovel(value: number): void {
-    this.currentNovel = new Novel(value);
+  setCurrentNovel(): void {
+    this.currentNovel = this.novels[this.novelIndex];
   }
 
   setCurrentSentence(): void {
@@ -166,26 +166,39 @@ class Series {
         this.currentNovel.setParagraph(0);
         this.currentNovel.setChapter(this.currentNovel.chapterIndex + 1);
 
+        // if (
+        // !this.isGameOver() &&
+        // this.currentNovel.chapterIndex >= this.currentNovel.chapters.length
+        // ) {
         if (
-          !this.isGameOver &&
           this.currentNovel.chapterIndex >= this.currentNovel.chapters.length
         ) {
-          this.currentNovel.sentenceIndex = 0;
-          this.currentNovel.setParagraph(0);
-          this.currentNovel.setChapter(0);
+          console.log("Pre", this.novelIndex, this.currentNovel.chapterIndex, this.currentNovel.paragraphIndex);
 
           this.setNovel(this.novelIndex + 1);
-          this.setCurrentNovel(this.novelIndex);
+
+          console.log("Post", this.novelIndex, this.currentNovel.chapterIndex, this.currentNovel.paragraphIndex);
+
+          if (this.novelIndex < this.novels.length) {
+            this.setCurrentNovel();
+
+            this.currentNovel.sentenceIndex = 0;
+            this.currentNovel.setParagraph(0);
+            this.currentNovel.setChapter(0);
+          }
         }
         this.toggleChapterChange();
       }
     }
 
     // Setting the current chapter and current paragraph after incrementing (fixing order later)
-    this.currentNovel.setCurrentChapter(this.currentNovel.chapterIndex);
-    this.currentNovel.setCurrentParagraph(this.currentNovel.paragraphIndex);
+    if (!this.isGameOver()) {
+      this.currentNovel.setCurrentChapter(this.currentNovel.chapterIndex);
+      this.currentNovel.setCurrentParagraph(this.currentNovel.paragraphIndex);
 
-    this.setCurrentSentence();
+      this.setCurrentSentence();
+    }
+
   }
 
   checkEmptyParagraph(): void {
@@ -214,7 +227,7 @@ class Series {
       GameDOM.resetTextContainerIndex();
 
       this.setNovel(newNovelIndex);
-      this.setCurrentNovel(this.novelIndex);
+      this.setCurrentNovel();
 
       this.currentNovel.setChapter(newChapterIndex);
       this.currentNovel.setCurrentChapter(
@@ -266,7 +279,7 @@ class Series {
 
   jumpSave(savedSlot: SavedSlot): void {
     this.setNovel(savedSlot.novel);
-    this.setCurrentNovel(this.novelIndex);
+    this.setCurrentNovel();
 
     this.currentNovel.setChapter(savedSlot.chapter);
 
