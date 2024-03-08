@@ -25,6 +25,8 @@ class Novel {
   chapterIndex: number;
   paragraphIndex: number;
 
+  chapterChanged: boolean;
+
   constructor(novelIndex: number) {
     this.chapters = knk[novelIndex]["chapters"];
     this.currentChapter = null;
@@ -51,6 +53,8 @@ class Novel {
     // Initializes the current chapter and paragraph upon creating a Novel instance
     this.setCurrentChapter(this.chapterIndex);
     this.setCurrentParagraph(this.paragraphIndex);
+    
+    this.chapterChanged = false;
   }
 
   setParagraph(value: number): void {
@@ -71,6 +75,7 @@ class Novel {
     this.currentParagraph = this.currentChapter[value].sentences;
     this.currentParagraphObject = this.currentChapter[value];
   }
+
 }
 
 const MAX_SLOTS = 3;
@@ -87,6 +92,8 @@ class Series {
   currentNovel: Novel;
   completedNovels: Novel[];
   savedSlots: SavedSlot[];
+
+  currentSentence: string;
 
   constructor() {
     Series.MAX_NOVELS = 2;
@@ -114,6 +121,10 @@ class Series {
 
     this.currentNovel = this.novels[this.novelIndex];
     this.completedNovels = [];
+
+    this.currentSentence = this.currentNovel.currentParagraph[
+      this.currentNovel.sentenceIndex
+    ];
   }
 
   setNovel(value: number): void {
@@ -124,6 +135,13 @@ class Series {
   setCurrentNovel(value: number): void {
     this.currentNovel = new Novel(value);
   }
+
+  setCurrentSentence(): void {
+    this.currentSentence = this.currentNovel.currentParagraph[
+      this.currentNovel.sentenceIndex
+    ];
+  }
+
 
   nextSentence(): void {
     // Display text by calling the GameDOM observer's controller
@@ -172,22 +190,71 @@ class Series {
           this.currentNovel.sentenceIndex = 0;
           this.currentNovel.setParagraph(0);
           this.currentNovel.setChapter(0);
-          
+
           this.setNovel(this.novelIndex + 1);
           this.setCurrentNovel(this.novelIndex);
         }
         console.log("should only be run if starting a new chapter");
-        GameDOM.clearText();
+        this.toggleChapterChange();
       }
     }
 
     // Setting the current chapter and current paragraph after incrementing (fixing order later)
     this.currentNovel.setCurrentChapter(this.currentNovel.chapterIndex);
     this.currentNovel.setCurrentParagraph(this.currentNovel.paragraphIndex);
+
+    this.setCurrentSentence();
+  }
+
+  checkEmptySentence(): void {
+    while (this.currentNovel.currentParagraph.length === 0) {
+      GameDOM.clearText();
+      console.log("Should only be run when encountering empty sentence");
+
+      this.currentNovel.sentenceIndex = 0;
+
+      let newParagraphIndex: number =
+        this.currentNovel.paragraphIndex + 1;
+      let newChapterIndex: number = this.currentNovel.chapterIndex;
+      let newNovelIndex: number = this.novelIndex;
+
+      if (
+        newParagraphIndex >= this.currentNovel.currentChapter.length
+      ) {
+        newParagraphIndex = 0;
+        newChapterIndex = this.currentNovel.chapterIndex + 1;
+
+        if (newChapterIndex >= this.currentNovel.chapters.length) {
+          newChapterIndex = 0;
+          newNovelIndex = this.novelIndex + 1;
+        }
+      }
+      GameDOM.resetTextContainerIndex();
+
+      this.setNovel(newNovelIndex);
+      this.setCurrentNovel(this.novelIndex);
+
+      this.currentNovel.setChapter(newChapterIndex);
+      this.currentNovel.setCurrentChapter(
+        this.currentNovel.chapterIndex
+      );
+
+      this.currentNovel.setParagraph(newParagraphIndex);
+      this.currentNovel.setCurrentParagraph(
+        this.currentNovel.paragraphIndex
+      );
+      GameDOM.textContainer.appendChild(document.createElement("p"));
+    }
   }
 
   isGameOver(): boolean {
     return this.novelIndex > this.novels.length;
+  }
+
+  toggleChapterChange(): void {
+    console.log("Pre", this.currentNovel.chapterChanged);
+    this.currentNovel.chapterChanged = this.currentNovel.chapterChanged == false;
+    console.log("Post", this.currentNovel.chapterChanged);
   }
 
   addCompletedNovel(value: number): void {

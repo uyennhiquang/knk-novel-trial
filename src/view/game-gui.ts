@@ -2,7 +2,7 @@
 // BUGS
 // On novel 1, chapter 3, paragraph 197, when trying to skip blank paragraphs at the end of a chapter, it leads to a out-of-index bug
 // Game does not move on to the next novel once reaching the end (?)
-// the whole shebang with empty sentences
+// the whole shebang with empty sentences, starting a new chapter, and overflow
 
 import { Series, Soundtrack, knk } from "../model/knk";
 
@@ -93,6 +93,13 @@ const GameDOM = (() => {
     }
   };
 
+  const chapterChangedHandler = () => {
+    if (series.currentNovel.chapterChanged) {
+      GameDOM.clearText();
+      series.toggleChapterChange();
+    }
+  }
+
   return {
     gameScreen,
     textContainer,
@@ -104,6 +111,7 @@ const GameDOM = (() => {
     continueGame,
     clearText,
     typeWriter,
+    chapterChangedHandler,
     incrTextContainerIndex,
     resetTextContainerIndex,
   };
@@ -174,13 +182,9 @@ const GameWindow = (() => {
     if (GameDOM.playing) {
       if (!series.isGameOver()) {
         if (!GameDOM.running) {
+          GameDOM.chapterChangedHandler();
           GameDOM.textContainer.appendChild(document.createElement("p"));
-
-          GameDOM.typeWriter(
-            series.currentNovel.currentParagraph[
-              series.currentNovel.sentenceIndex
-            ]
-          );
+          GameDOM.typeWriter(series.currentSentence)
           GameWindow.checkForParagraphOverflow();
         } else {
           GameDOM.textSpeed = 5;
