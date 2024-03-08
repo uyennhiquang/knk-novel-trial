@@ -9,12 +9,22 @@ const series = new Series();
 let soundtrack = new Soundtrack(series.novelIndex);
 
 console.log(
-  "Novel:", series.novelIndex, "\n",
-  "Chapter:", series.currentNovel.chapterIndex, "\n",
-  "Paragraph Position:", series.currentNovel.paragraphIndex, "\n",
-  "Sentence Position:", series.currentNovel.sentenceIndex, "\n",
-  "Current sentence:", series.currentNovel.currentParagraph[series.currentNovel.sentenceIndex]
-  );
+  "Init (on first load)\n",
+  "Novel:",
+  series.novelIndex,
+  "\n",
+  "Chapter:",
+  series.currentNovel.chapterIndex,
+  "\n",
+  "Paragraph Position:",
+  series.currentNovel.paragraphIndex,
+  "\n",
+  "Sentence Position:",
+  series.currentNovel.sentenceIndex,
+  "\n",
+  "Current sentence:",
+  series.currentNovel.currentParagraph[series.currentNovel.sentenceIndex]
+);
 
 const GameDOM = (() => {
   const gameScreen = document.getElementById("screen--game");
@@ -43,11 +53,8 @@ const GameDOM = (() => {
   // const continueGame = playGame;
   const continueGame = () => {
     playGame();
-    // series.currentNovel.setChapter(0);
-    // series.currentNovel.setParagraph(0);
 
     series.currentNovel.sentenceIndex = 0;
-
   };
 
   const clearText = () => {
@@ -55,11 +62,13 @@ const GameDOM = (() => {
     textContainerIndex = 0;
   };
 
-  const setTextContainerIndex = (index: number) => {
-    textContainerIndex = index;
-  }
-  const getTextContainerIndex = ():number => textContainerIndex;
+  const incrTextContainerIndex = () => {
+    textContainerIndex++;
+  };
 
+  const resetTextContainerIndex = () => {
+    textContainerIndex = 0;
+  };
   /**
    * The typeWriter() function works by using setTimeout() to call it in interval -- each time typeWriter() is called it adds 1 letter to the specific <p> (indicated by textContainerIndex) inside the textContainer div.
    * @param text sentence text
@@ -68,8 +77,7 @@ const GameDOM = (() => {
     GameDOM.running = true;
 
     if (charAt < text.length) {
-      textContainer.children[`${textContainerIndex}`].innerHTML +=
-        text[charAt];
+      textContainer.children[`${textContainerIndex}`].innerHTML += text[charAt];
       charAt++;
       setTimeout(() => typeWriter(text), GameDOM.textSpeed);
     } else if (charAt === text.length) {
@@ -78,9 +86,11 @@ const GameDOM = (() => {
       GameDOM.running = false;
       charAt = 0;
       GameDOM.textSpeed = 18;
+      series.nextSentence();
+
+      // GameWindow.checkForParagraphOverflow();
     }
   };
-
 
   return {
     gameScreen,
@@ -93,8 +103,8 @@ const GameDOM = (() => {
     continueGame,
     clearText,
     typeWriter,
-    getTextContainerIndex,
-    setTextContainerIndex
+    incrTextContainerIndex,
+    resetTextContainerIndex,
   };
 })();
 
@@ -127,13 +137,14 @@ const ParagraphJump = (() => {
 
 const GameWindow = (() => {
   const gameWindow = document.getElementById("window--text");
-  const windowVertPadding =
-    2 * Number(window.getComputedStyle(gameWindow).paddingTop.slice(0, -2));
-  const roomError = 10;
-  const MAX_CONTAINER_HEIGHT =
-    gameWindow.offsetHeight - windowVertPadding - roomError;
 
   const checkForParagraphOverflow = () => {
+    const windowVertPadding =
+      2 * Number(window.getComputedStyle(gameWindow).paddingTop.slice(0, -2));
+    const roomError = 10;
+    const MAX_CONTAINER_HEIGHT =
+      gameWindow.offsetHeight - windowVertPadding - roomError;
+
     if (GameDOM.textContainer.children.length > 0) {
       const p = document.createElement("p");
       const currentParagraphStr = series.currentNovel.currentParagraph
@@ -144,31 +155,38 @@ const GameWindow = (() => {
 
       if (GameDOM.textContainer.offsetHeight >= MAX_CONTAINER_HEIGHT) {
         GameDOM.clearText();
+        console.log("should only be run when new paragraph overflow blah blah");
       } else {
         GameDOM.textContainer.removeChild(GameDOM.textContainer.lastChild);
       }
     }
-
-    GameDOM.textContainer.appendChild(document.createElement("p"));
   };
+
   const playGame = () => {
     if (GameDOM.playing) {
-      if (!GameDOM.running) {
-        series.nextParagraph();
-
-        } else {
-          GameDOM.clearText();
+      if (!series.isGameOver()) {
+        if (!GameDOM.running) {
           GameDOM.textContainer.appendChild(document.createElement("p"));
+
           GameDOM.typeWriter(
-            "You've reached the end of the demo. Thank you for playing."
+            series.currentNovel.currentParagraph[
+              series.currentNovel.sentenceIndex
+            ]
           );
-          GameDOM.playing = false;
+          GameWindow.checkForParagraphOverflow();
+        } else {
+          GameDOM.textSpeed = 5;
         }
       } else {
-        GameDOM.textSpeed = 5;
+        GameDOM.clearText();
+        GameDOM.textContainer.appendChild(document.createElement("p"));
+        GameDOM.typeWriter(
+          "You've reached the end of the demo. Thank you for playing."
+        );
+        GameDOM.playing = false;
       }
     }
-  // };
+  };
 
   gameWindow.addEventListener("click", playGame);
   document.addEventListener("keydown", (e) => {
@@ -184,6 +202,10 @@ const GameWindow = (() => {
       playGame();
     }
   });
+
+  return {
+    checkForParagraphOverflow,
+  };
 })();
 
 const SaveDOM = (() => {
@@ -272,6 +294,4 @@ const InitDOM = (() => {
   }
 })();
 
-
-
-export { GameDOM };
+export { GameDOM, GameWindow };

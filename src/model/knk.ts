@@ -1,8 +1,9 @@
 import { Howl } from "howler";
 import { knk } from "./novel";
-import { GameDOM } from "../view/game-gui";
+import { GameDOM, GameWindow } from "../view/game-gui";
 
 // Edit line "A person doesn't kill herself without wouldn't kill themselves." in the novel + database
+
 type ParagraphText = string[];
 type Paragraph = {
   audioId?: string[];
@@ -80,12 +81,16 @@ type SavedSlot = {
   paragraph: number;
 };
 class Series {
+  static MAX_NOVELS: number;
   novelIndex: number;
+  novels: Novel[];
   currentNovel: Novel;
   completedNovels: Novel[];
   savedSlots: SavedSlot[];
 
   constructor() {
+    Series.MAX_NOVELS = 2;
+
     if (typeof localStorage.getItem("novelIndex") !== "string") {
       this.novelIndex = 0;
       localStorage.setItem("novelIndex", String(this.novelIndex));
@@ -101,7 +106,13 @@ class Series {
       }
     }
 
-    this.currentNovel = new Novel(this.novelIndex);
+    this.novels = [];
+
+    for (let i = 0; i < Series.MAX_NOVELS; i++) {
+      this.novels.push(new Novel(i));
+    }
+
+    this.currentNovel = this.novels[this.novelIndex];
     this.completedNovels = [];
   }
 
@@ -114,47 +125,70 @@ class Series {
     this.currentNovel = new Novel(value);
   }
 
-  nextParagraph(): void {
-    // Setting the current chapter and current paragraph after incrementing (fixing order later)
-    // this.currentNovel.setCurrentChapter(this.currentNovel.chapterIndex);
-    // this.currentNovel.setCurrentParagraph(this.currentNovel.paragraphIndex);
-
-    // Starts a new paragraph element if we've gone out of sentenceIndex, aka making a new p tag
-    // if (
-    //   this.currentNovel.sentenceIndex >=
-    //   this.currentNovel.currentParagraph.length
-    // ) {
-    //   this.currentNovel.sentenceIndex = 0;
-    //   this.currentNovel.setParagraph(this.currentNovel.paragraphIndex + 1);
-    //   GameDOM.textContainerIndex++;
-
-      // Checks if starting a new paragraph would be out of paragraphIndex for the current chapter
-    //   if (
-    //     this.currentNovel.paragraphIndex >=
-    //     this.currentNovel.currentChapter.length
-    //   ) {
-    //     this.currentNovel.sentenceIndex = 0;
-    //     this.currentNovel.setParagraph(0);
-    //     this.currentNovel.setChapter(this.currentNovel.chapterIndex + 1);
-
-    //     GameDOM.clearText();
-    //   }
-    // }
-
-    
-
+  nextSentence(): void {
     // Display text by calling the GameDOM observer's controller
-    GameDOM.typeWriter(
+    console.log(
+      "Novel:",
+      this.novelIndex,
+      "\n",
+      "Chapter:",
+      this.currentNovel.chapterIndex,
+      "\n",
+      "Paragraph Position:",
+      this.currentNovel.paragraphIndex,
+      "\n",
+      "Sentence Position:",
+      this.currentNovel.sentenceIndex,
+      "\n",
+      "Current sentence:",
       this.currentNovel.currentParagraph[this.currentNovel.sentenceIndex]
     );
 
     this.currentNovel.sentenceIndex++;
+
+    // PLEASE REWRITE THESE UGLY IF STATEMENTS AS METHODS. THANK YOU
+    // Starts a new paragraph element if we've gone out of sentenceIndex, aka making a new p tag
+    if (
+      this.currentNovel.sentenceIndex >=
+      this.currentNovel.currentParagraph.length
+    ) {
+      this.currentNovel.sentenceIndex = 0;
+      this.currentNovel.setParagraph(this.currentNovel.paragraphIndex + 1);
+      GameDOM.incrTextContainerIndex();
+
+      // Checks if starting a new paragraph would be out of paragraphIndex for the current chapter
+      if (
+        this.currentNovel.paragraphIndex >=
+        this.currentNovel.currentChapter.length
+      ) {
+        this.currentNovel.sentenceIndex = 0;
+        this.currentNovel.setParagraph(0);
+        this.currentNovel.setChapter(this.currentNovel.chapterIndex + 1);
+
+        if (
+          !this.isGameOver &&
+          this.currentNovel.chapterIndex >= this.currentNovel.chapters.length
+        ) {
+          this.currentNovel.sentenceIndex = 0;
+          this.currentNovel.setParagraph(0);
+          this.currentNovel.setChapter(0);
+          
+          this.setNovel(this.novelIndex + 1);
+          this.setCurrentNovel(this.novelIndex);
+        }
+        console.log("should only be run if starting a new chapter");
+        GameDOM.clearText();
+      }
+    }
+
+    // Setting the current chapter and current paragraph after incrementing (fixing order later)
+    this.currentNovel.setCurrentChapter(this.currentNovel.chapterIndex);
+    this.currentNovel.setCurrentParagraph(this.currentNovel.paragraphIndex);
   }
 
-  // isGaveOver(): boolean {
-  //   return this.curr
-  // }
-
+  isGameOver(): boolean {
+    return this.novelIndex > this.novels.length;
+  }
 
   addCompletedNovel(value: number): void {
     this.completedNovels.push(new Novel(value));
