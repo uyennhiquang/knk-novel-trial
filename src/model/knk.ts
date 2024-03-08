@@ -53,7 +53,7 @@ class Novel {
     // Initializes the current chapter and paragraph upon creating a Novel instance
     this.setCurrentChapter(this.chapterIndex);
     this.setCurrentParagraph(this.paragraphIndex);
-    
+
     this.chapterChanged = false;
   }
 
@@ -145,23 +145,6 @@ class Series {
 
   nextSentence(): void {
     // Display text by calling the GameDOM observer's controller
-    console.log(
-      "Novel:",
-      this.novelIndex,
-      "\n",
-      "Chapter:",
-      this.currentNovel.chapterIndex,
-      "\n",
-      "Paragraph Position:",
-      this.currentNovel.paragraphIndex,
-      "\n",
-      "Sentence Position:",
-      this.currentNovel.sentenceIndex,
-      "\n",
-      "Current sentence:",
-      this.currentNovel.currentParagraph[this.currentNovel.sentenceIndex]
-    );
-
     this.currentNovel.sentenceIndex++;
 
     // PLEASE REWRITE THESE UGLY IF STATEMENTS AS METHODS. THANK YOU
@@ -194,7 +177,6 @@ class Series {
           this.setNovel(this.novelIndex + 1);
           this.setCurrentNovel(this.novelIndex);
         }
-        console.log("should only be run if starting a new chapter");
         this.toggleChapterChange();
       }
     }
@@ -206,7 +188,7 @@ class Series {
     this.setCurrentSentence();
   }
 
-  checkEmptySentence(): void {
+  checkEmptyParagraph(): void {
     while (this.currentNovel.currentParagraph.length === 0) {
       GameDOM.clearText();
       console.log("Should only be run when encountering empty sentence");
@@ -243,8 +225,11 @@ class Series {
       this.currentNovel.setCurrentParagraph(
         this.currentNovel.paragraphIndex
       );
-      GameDOM.textContainer.appendChild(document.createElement("p"));
+
+      this.setCurrentSentence();
     }
+
+
   }
 
   isGameOver(): boolean {
@@ -252,9 +237,7 @@ class Series {
   }
 
   toggleChapterChange(): void {
-    console.log("Pre", this.currentNovel.chapterChanged);
     this.currentNovel.chapterChanged = this.currentNovel.chapterChanged == false;
-    console.log("Post", this.currentNovel.chapterChanged);
   }
 
   addCompletedNovel(value: number): void {

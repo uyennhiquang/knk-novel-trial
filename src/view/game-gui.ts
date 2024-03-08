@@ -2,7 +2,6 @@
 // BUGS
 // On novel 1, chapter 3, paragraph 197, when trying to skip blank paragraphs at the end of a chapter, it leads to a out-of-index bug
 // Game does not move on to the next novel once reaching the end (?)
-// the whole shebang with empty sentences, starting a new chapter, and overflow
 
 import { Series, Soundtrack, knk } from "../model/knk";
 
@@ -30,9 +29,11 @@ console.log(
 const GameDOM = (() => {
   const gameScreen = document.getElementById("screen--game");
   const textContainer = document.getElementById("container--text");
+  const DEFAULT_TEXT_SPEED = 18;
+  const SPED_UP_TEXT_SPEED = 5;
 
   // Consider encapsulating these by making functions that update these states, but not exposing them
-  let textSpeed = 18;
+  let textSpeed = DEFAULT_TEXT_SPEED;
   let textContainerIndex = 0;
   let playing = false;
   let running = false;
@@ -80,18 +81,21 @@ const GameDOM = (() => {
     if (charAt < text.length) {
       textContainer.children[`${textContainerIndex}`].innerHTML += text[charAt];
       charAt++;
-      setTimeout(() => typeWriter(text), GameDOM.textSpeed);
+      setTimeout(() => typeWriter(text), textSpeed);
     } else if (charAt === text.length) {
       textContainer.children[`${textContainerIndex}`].innerHTML += " ";
 
       GameDOM.running = false;
       charAt = 0;
-      GameDOM.textSpeed = 18;
+      textSpeed = DEFAULT_TEXT_SPEED;
       series.nextSentence();
-
-      // GameWindow.checkForParagraphOverflow();
     }
   };
+
+  const speedUp = () => {
+    textSpeed = SPED_UP_TEXT_SPEED;
+  }
+
 
   const chapterChangedHandler = () => {
     if (series.currentNovel.chapterChanged) {
@@ -105,12 +109,12 @@ const GameDOM = (() => {
     textContainer,
     running,
     playing,
-    textSpeed,
 
     startGame,
     continueGame,
     clearText,
     typeWriter,
+    speedUp,
     chapterChangedHandler,
     incrTextContainerIndex,
     resetTextContainerIndex,
@@ -182,12 +186,15 @@ const GameWindow = (() => {
     if (GameDOM.playing) {
       if (!series.isGameOver()) {
         if (!GameDOM.running) {
+          series.checkEmptyParagraph();
           GameDOM.chapterChangedHandler();
-          GameDOM.textContainer.appendChild(document.createElement("p"));
-          GameDOM.typeWriter(series.currentSentence)
           GameWindow.checkForParagraphOverflow();
+          
+          GameDOM.textContainer.appendChild(document.createElement("p"));
+
+          GameDOM.typeWriter(series.currentSentence);
         } else {
-          GameDOM.textSpeed = 5;
+          GameDOM.speedUp();
         }
       } else {
         GameDOM.clearText();
