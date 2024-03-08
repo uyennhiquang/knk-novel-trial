@@ -177,10 +177,11 @@ const GameWindow = (() => {
 
   /**
    * An eventHandler when clicking the gameWindow. The game "mechanic" follows the workflow below:
-   * 1. Create a new <p> tag
-   * 2. Call the typeWriter -- the handler -- to display the text (which will call the nextSentence() method after it is done.
-   * 3. Check for gameWindow overflow
-   * REFER TO THE playGame() eventHandler INSIDE game-gui-old FOR THINGS TO DO
+   * 1. Check for empty paragraph (model)
+   * 2. Clear text if we just moved onto the next chapter
+   * 3. Check for paragraph overflow (has to be placed after the empty paragraph check, otherwise, that empty paragraph might've given us a paragraph that wouldn't fit the window)
+   * 4. Display text 
+   * 5. Call model to update the next sentence
    */
   const playGame = () => {
     if (GameDOM.playing) {
