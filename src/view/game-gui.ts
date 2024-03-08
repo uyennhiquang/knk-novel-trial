@@ -1,7 +1,8 @@
 // Consider making a DOM init that initiates what to display
 // BUGS
 // On novel 1, chapter 3, paragraph 197, when trying to skip blank paragraphs at the end of a chapter, it leads to a out-of-index bug
-// Game does not move on to the next novel once reaching the end
+// Game does not move on to the next novel once reaching the end (?)
+// the whole shebang with empty sentences
 
 import { Series, Soundtrack, knk } from "../model/knk";
 
@@ -162,6 +163,13 @@ const GameWindow = (() => {
     }
   };
 
+  /**
+   * An eventHandler when clicking the gameWindow. The game "mechanic" follows the workflow below:
+   * 1. Create a new <p> tag
+   * 2. Call the typeWriter -- the handler -- to display the text (which will call the nextSentence() method after it is done.
+   * 3. Check for gameWindow overflow
+   * REFER TO THE playGame() eventHandler INSIDE game-gui-old FOR THINGS TO DO
+   */
   const playGame = () => {
     if (GameDOM.playing) {
       if (!series.isGameOver()) {
@@ -198,7 +206,6 @@ const GameWindow = (() => {
       (GameDOM.playing && (e.key == SPACE || e.key == DOWN)) ||
       e.key == ENTER
     ) {
-      // console.log(e);
       playGame();
     }
   });
