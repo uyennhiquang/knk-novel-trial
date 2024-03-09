@@ -166,18 +166,11 @@ class Series {
         this.currentNovel.setParagraph(0);
         this.currentNovel.setChapter(this.currentNovel.chapterIndex + 1);
 
-        // if (
-        // !this.isGameOver() &&
-        // this.currentNovel.chapterIndex >= this.currentNovel.chapters.length
-        // ) {
-        if (
+       if (
           this.currentNovel.chapterIndex >= this.currentNovel.chapters.length
         ) {
-          console.log("Pre", this.novelIndex, this.currentNovel.chapterIndex, this.currentNovel.paragraphIndex);
 
           this.setNovel(this.novelIndex + 1);
-
-          console.log("Post", this.novelIndex, this.currentNovel.chapterIndex, this.currentNovel.paragraphIndex);
 
           if (this.novelIndex < this.novels.length) {
             this.setCurrentNovel();
@@ -204,7 +197,6 @@ class Series {
   checkEmptyParagraph(): void {
     while (this.currentNovel.currentParagraph.length === 0) {
       GameDOM.clearText();
-      console.log("Should only be run when encountering empty sentence");
 
       this.currentNovel.sentenceIndex = 0;
 
@@ -246,7 +238,7 @@ class Series {
   }
 
   isGameOver(): boolean {
-    return this.novelIndex > this.novels.length;
+    return this.novelIndex >= this.novels.length;
   }
 
   toggleChapterChange(): void {

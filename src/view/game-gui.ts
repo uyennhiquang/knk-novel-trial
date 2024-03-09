@@ -131,7 +131,6 @@ const ParagraphJump = (() => {
 
   const jump = () => {
     GameDOM.clearText();
-    // GameDOM.textContainer.appendChild(document.createElement("p"));
 
     series.setNovel(Number(inputNovel.value));
     series.setCurrentNovel();
