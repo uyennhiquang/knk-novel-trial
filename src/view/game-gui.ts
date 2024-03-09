@@ -197,6 +197,7 @@ const GameWindow = (() => {
           
           GameDOM.textContainer.appendChild(document.createElement("p"));
 
+          soundtrack.playAudio(series.currentNovel.currentParagraphObject);
           GameDOM.typeWriter(series.currentSentence);
         } else {
           GameDOM.speedUp();
