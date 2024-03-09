@@ -1,7 +1,6 @@
 // Consider making a DOM init that initiates what to display
 // BUGS
-// On novel 1, chapter 3, paragraph 197, when trying to skip blank paragraphs at the end of a chapter, it leads to a out-of-index bug
-// Game doesn't properly show the ending message once reach the end of the last novel
+// checkForParagraphOverflow() doesn't clear paragraphs, but only checking for sentence overflow
 
 import { Series, Soundtrack, knk } from "../model/knk";
 
@@ -180,18 +179,21 @@ const GameWindow = (() => {
 
   /**
    * An eventHandler when clicking the gameWindow. The game "mechanic" follows the workflow below:
-   * 1. Check for empty paragraph (model)
-   * This has to be the first thing as the next 2 actions depend on the outcome of this function. In a non-edge case (user continuing the game )
+   * 1. Check for empty paragraph
+   * This has to be the first thing as the next 2 actions depend on the outcome of this function. In a non-edge case (user continuing the game), after the nextSentence() method is invoked in typeWriter, the current "sentence"/paragraph is set, which may or may be empty. If it is empty, it has to be dealt with before moving onto the other parts below.
    * 2. Clear text if we just moved onto the next chapter
-   * 3. Check for paragraph overflow (has to be placed after the empty paragraph check, otherwise, that empty paragraph might've given us a paragraph that wouldn't fit the window)
+   * Has to be placed before the typeWriter call, otherwise it'll clear the text once typeWriter is done executing. 
+   * 3. Check for paragraph overflow 
    * 4. Display text 
-   * 5. Call model to update the next sentence
+   * This HAS to be the very last thing that happens due to how disjointed the functions/methods for checking whether it is safe to display the sentence. Basically, every failsafe method has to be executed to ensure that there is a valid sentence and <p> tag.
+   * 4b. Call model to update the next sentence
    */
   const playGame = () => {
     if (GameDOM.playing) {
       if (!series.isGameOver()) {
         if (!GameDOM.running) {
           series.checkEmptyParagraph();
+
           GameDOM.chapterChangedHandler();
           GameWindow.checkForParagraphOverflow();
           
