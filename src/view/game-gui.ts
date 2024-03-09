@@ -52,7 +52,6 @@ const GameDOM = (() => {
     series.currentNovel.sentenceIndex = 0;
   };
 
-  // const continueGame = playGame;
   const continueGame = () => {
     playGame();
 
@@ -182,6 +181,7 @@ const GameWindow = (() => {
   /**
    * An eventHandler when clicking the gameWindow. The game "mechanic" follows the workflow below:
    * 1. Check for empty paragraph (model)
+   * This has to be the first thing as the next 2 actions depend on the outcome of this function. In a non-edge case (user continuing the game )
    * 2. Clear text if we just moved onto the next chapter
    * 3. Check for paragraph overflow (has to be placed after the empty paragraph check, otherwise, that empty paragraph might've given us a paragraph that wouldn't fit the window)
    * 4. Display text 
