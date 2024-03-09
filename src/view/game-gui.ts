@@ -139,10 +139,10 @@ const ParagraphJump = (() => {
     soundtrack = new Soundtrack(series.novelIndex);
 
     series.currentNovel.setChapter(Number(inputChapter.value));
-    series.currentNovel.setCurrentChapter(series.currentNovel.chapterIndex);
+    series.currentNovel.setCurrentChapter();
 
     series.currentNovel.setParagraph(Number(inputParagraph.value));
-    series.currentNovel.setCurrentParagraph(series.currentNovel.paragraphIndex);
+    series.currentNovel.setCurrentParagraph();
 
     series.currentNovel.sentenceIndex = 0;
 

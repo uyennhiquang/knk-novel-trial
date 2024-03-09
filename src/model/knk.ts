@@ -51,8 +51,10 @@ class Novel {
     }
 
     // Initializes the current chapter and paragraph upon creating a Novel instance
-    this.setCurrentChapter(this.chapterIndex);
-    this.setCurrentParagraph(this.paragraphIndex);
+    // this.setCurrentChapter(this.chapterIndex);
+    this.setCurrentChapter();
+    // this.setCurrentParagraph(this.paragraphIndex);
+    this.setCurrentParagraph();
 
     this.chapterChanged = false;
   }
@@ -67,15 +69,14 @@ class Novel {
     localStorage.setItem("chapterIndex", String(value));
   }
 
-  setCurrentChapter(value: number): void {
-    this.currentChapter = this.chapters[value].texts;
+  setCurrentChapter(): void {
+    this.currentChapter = this.chapters[this.chapterIndex].texts;
   }
 
-  setCurrentParagraph(value: number): void {
-    this.currentParagraph = this.currentChapter[value].sentences;
-    this.currentParagraphObject = this.currentChapter[value];
+  setCurrentParagraph(): void {
+    this.currentParagraphObject = this.currentChapter[this.paragraphIndex];
+    this.currentParagraph = this.currentParagraphObject.sentences;
   }
-
 }
 
 const MAX_SLOTS = 3;
@@ -122,9 +123,8 @@ class Series {
     this.currentNovel = this.novels[this.novelIndex];
     this.completedNovels = [];
 
-    this.currentSentence = this.currentNovel.currentParagraph[
-      this.currentNovel.sentenceIndex
-    ];
+    this.currentSentence =
+      this.currentNovel.currentParagraph[this.currentNovel.sentenceIndex];
   }
 
   setNovel(value: number): void {
@@ -137,11 +137,9 @@ class Series {
   }
 
   setCurrentSentence(): void {
-    this.currentSentence = this.currentNovel.currentParagraph[
-      this.currentNovel.sentenceIndex
-    ];
+    this.currentSentence =
+      this.currentNovel.currentParagraph[this.currentNovel.sentenceIndex];
   }
-
 
   nextSentence(): void {
     // Display text by calling the GameDOM observer's controller
@@ -166,10 +164,9 @@ class Series {
         this.currentNovel.setParagraph(0);
         this.currentNovel.setChapter(this.currentNovel.chapterIndex + 1);
 
-       if (
+        if (
           this.currentNovel.chapterIndex >= this.currentNovel.chapters.length
         ) {
-
           this.setNovel(this.novelIndex + 1);
 
           if (this.novelIndex < this.novels.length) {
@@ -186,12 +183,11 @@ class Series {
 
     // Setting the current chapter and current paragraph after incrementing (fixing order later)
     if (!this.isGameOver()) {
-      this.currentNovel.setCurrentChapter(this.currentNovel.chapterIndex);
-      this.currentNovel.setCurrentParagraph(this.currentNovel.paragraphIndex);
+      this.currentNovel.setCurrentChapter();
+      this.currentNovel.setCurrentParagraph();
 
       this.setCurrentSentence();
     }
-
   }
 
   checkEmptyParagraph(): void {
@@ -200,14 +196,11 @@ class Series {
 
       this.currentNovel.sentenceIndex = 0;
 
-      let newParagraphIndex: number =
-        this.currentNovel.paragraphIndex + 1;
+      let newParagraphIndex: number = this.currentNovel.paragraphIndex + 1;
       let newChapterIndex: number = this.currentNovel.chapterIndex;
       let newNovelIndex: number = this.novelIndex;
 
-      if (
-        newParagraphIndex >= this.currentNovel.currentChapter.length
-      ) {
+      if (newParagraphIndex >= this.currentNovel.currentChapter.length) {
         newParagraphIndex = 0;
         newChapterIndex = this.currentNovel.chapterIndex + 1;
 
@@ -222,19 +215,13 @@ class Series {
       this.setCurrentNovel();
 
       this.currentNovel.setChapter(newChapterIndex);
-      this.currentNovel.setCurrentChapter(
-        this.currentNovel.chapterIndex
-      );
+      this.currentNovel.setCurrentChapter();
 
       this.currentNovel.setParagraph(newParagraphIndex);
-      this.currentNovel.setCurrentParagraph(
-        this.currentNovel.paragraphIndex
-      );
+      this.currentNovel.setCurrentParagraph();
 
       this.setCurrentSentence();
     }
-
-
   }
 
   isGameOver(): boolean {
@@ -242,7 +229,8 @@ class Series {
   }
 
   toggleChapterChange(): void {
-    this.currentNovel.chapterChanged = this.currentNovel.chapterChanged == false;
+    this.currentNovel.chapterChanged =
+      this.currentNovel.chapterChanged == false;
   }
 
   addCompletedNovel(value: number): void {
