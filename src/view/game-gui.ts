@@ -131,7 +131,7 @@ const ParagraphJump = (() => {
 
   const jump = () => {
     GameDOM.clearText();
-    GameDOM.textContainer.appendChild(document.createElement("p"));
+    // GameDOM.textContainer.appendChild(document.createElement("p"));
 
     series.setNovel(Number(inputNovel.value));
     series.setCurrentNovel();
@@ -140,9 +140,14 @@ const ParagraphJump = (() => {
     soundtrack = new Soundtrack(series.novelIndex);
 
     series.currentNovel.setChapter(Number(inputChapter.value));
+    series.currentNovel.setCurrentChapter(series.currentNovel.chapterIndex);
 
     series.currentNovel.setParagraph(Number(inputParagraph.value));
+    series.currentNovel.setCurrentParagraph(series.currentNovel.paragraphIndex);
+
     series.currentNovel.sentenceIndex = 0;
+
+    series.setCurrentSentence();
   };
 
   buttonElt.addEventListener("click", jump);
