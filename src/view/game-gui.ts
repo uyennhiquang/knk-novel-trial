@@ -1,6 +1,6 @@
 // Consider making a DOM init that initiates what to display
 // BUGS
-// checkForParagraphOverflow() doesn't clear paragraphs, but only checking for sentence overflow
+// checkForParagraphOverflow() doesn't clear paragraphs, but only checking for sentence overflow (test on 0-1-0)
 
 import { Series, Soundtrack, knk } from "../model/knk";
 
@@ -53,7 +53,6 @@ const GameDOM = (() => {
 
   const continueGame = () => {
     playGame();
-
     series.currentNovel.sentenceIndex = 0;
   };
 
@@ -69,6 +68,7 @@ const GameDOM = (() => {
   const resetTextContainerIndex = () => {
     textContainerIndex = 0;
   };
+
   /**
    * The typeWriter() function works by using setTimeout() to call it in interval -- each time typeWriter() is called it adds 1 letter to the specific <p> (indicated by textContainerIndex) inside the textContainer div.
    * @param text sentence text
@@ -87,20 +87,40 @@ const GameDOM = (() => {
       charAt = 0;
       textSpeed = DEFAULT_TEXT_SPEED;
       series.nextSentence();
+
+      // print next sentence/paragraph
+      console.log(
+        "Novel:",
+        series.novelIndex,
+        "\n",
+        "Chapter:",
+        series.currentNovel.chapterIndex,
+        "\n",
+        "Paragraph Position:",
+        series.currentNovel.paragraphIndex,
+        "\n",
+        "Sentence Position:",
+        series.currentNovel.sentenceIndex,
+        "\n",
+        "Current paragraph: ",
+        series.currentNovel.currentParagraph,
+        "\n",
+        "Current sentence:",
+        series.currentNovel.currentParagraph[series.currentNovel.sentenceIndex]
+      );
     }
   };
 
   const speedUp = () => {
     textSpeed = SPED_UP_TEXT_SPEED;
-  }
-
+  };
 
   const chapterChangedHandler = () => {
     if (series.currentNovel.chapterChanged) {
       GameDOM.clearText();
       series.toggleChapterChange();
     }
-  }
+  };
 
   return {
     gameScreen,
@@ -156,14 +176,14 @@ const GameWindow = (() => {
   const checkForParagraphOverflow = () => {
     const windowVertPadding =
       2 * Number(window.getComputedStyle(gameWindow).paddingTop.slice(0, -2));
-    const roomError = 10;
+    const roomError = 0;
     const MAX_CONTAINER_HEIGHT =
       gameWindow.offsetHeight - windowVertPadding - roomError;
 
     if (GameDOM.textContainer.children.length > 0) {
       const p = document.createElement("p");
       const currentParagraphStr = series.currentNovel.currentParagraph
-        .map((sentence) => `${sentence}`)
+        .map((sentence) => sentence)
         .join(" ");
       p.innerHTML = currentParagraphStr;
       GameDOM.textContainer.appendChild(p);
@@ -182,9 +202,9 @@ const GameWindow = (() => {
    * 1. Check for empty paragraph
    * This has to be the first thing as the next 2 actions depend on the outcome of this function. In a non-edge case (user continuing the game), after the nextSentence() method is invoked in typeWriter, the current "sentence"/paragraph is set, which may or may be empty. If it is empty, it has to be dealt with before moving onto the other parts below.
    * 2. Clear text if we just moved onto the next chapter
-   * Has to be placed before the typeWriter call, otherwise it'll clear the text once typeWriter is done executing. 
-   * 3. Check for paragraph overflow 
-   * 4. Display text 
+   * Has to be placed before the typeWriter call, otherwise it'll clear the text once typeWriter is done executing.
+   * 3. Check for paragraph overflow
+   * 4. Display text
    * This HAS to be the very last thing that happens due to how disjointed the functions/methods for checking whether it is safe to display the sentence. Basically, every failsafe method has to be executed to ensure that there is a valid sentence and <p> tag.
    * 4b. Call model to update the next sentence
    */
@@ -196,7 +216,7 @@ const GameWindow = (() => {
 
           GameDOM.chapterChangedHandler();
           GameWindow.checkForParagraphOverflow();
-          
+
           GameDOM.textContainer.appendChild(document.createElement("p"));
 
           soundtrack.playAudio(series.currentNovel.currentParagraphObject);
@@ -205,7 +225,7 @@ const GameWindow = (() => {
           GameDOM.speedUp();
         }
       } else {
-        console.log
+        console.log;
         GameDOM.clearText();
         GameDOM.textContainer.appendChild(document.createElement("p"));
         GameDOM.typeWriter(
