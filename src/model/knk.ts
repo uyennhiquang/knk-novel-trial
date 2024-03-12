@@ -25,8 +25,6 @@ class Novel {
   chapterIndex: number;
   paragraphIndex: number;
 
-  chapterChanged: boolean;
-
   constructor(novelIndex: number) {
     this.chapters = knk[novelIndex]["chapters"];
     this.currentChapter = null;
@@ -55,8 +53,6 @@ class Novel {
     this.setCurrentChapter();
     // this.setCurrentParagraph(this.paragraphIndex);
     this.setCurrentParagraph();
-
-    this.chapterChanged = false;
   }
 
   setParagraph(value: number): void {
@@ -86,187 +82,248 @@ type SavedSlot = {
   chapter: number;
   paragraph: number;
 };
-class Series {
-  static MAX_NOVELS: number;
-  novelIndex: number;
-  novels: Novel[];
-  currentNovel: Novel;
-  completedNovels: Novel[];
-  savedSlots: SavedSlot[];
 
-  currentSentence: string;
+const series = (() => {
+  const MAX_NOVELS: number = 2;
+  const novels: Novel[] = [];
+  const completedNovels: Novel[] = [];
+  // const savedSlots: SavedSlot[] = [];
 
-  constructor() {
-    Series.MAX_NOVELS = 2;
+  let novelIndex: number = 0;
+  let currentNovel: Novel = null;
+  let chapterChanged: boolean = false;
 
-    if (typeof localStorage.getItem("novelIndex") !== "string") {
-      this.novelIndex = 0;
-      localStorage.setItem("novelIndex", String(this.novelIndex));
-    } else {
-      this.novelIndex = Number(localStorage.getItem("novelIndex"));
+  let currentSentence: string = "";
+
+  if (typeof localStorage.getItem("novelIndex") !== "string") {
+    novelIndex = 0;
+    localStorage.setItem("novelIndex", String(novelIndex));
+  } else {
+    novelIndex = Number(localStorage.getItem("novelIndex"));
+  }
+
+  const savedSlots: SavedSlot[] = Array(MAX_SLOTS).fill(null);
+  for (let i = 0; i < MAX_SLOTS; i++) {
+    const localSlot = localStorage.getItem(`slot${i}`);
+    if (typeof localSlot === "string") {
+      savedSlots[i] = JSON.parse(localSlot);
     }
-
-    this.savedSlots = Array(MAX_SLOTS).fill(null);
-    for (let i = 0; i < MAX_SLOTS; i++) {
-      const localSlot = localStorage.getItem(`slot${i}`);
-      if (typeof localSlot === "string") {
-        this.savedSlots[i] = JSON.parse(localSlot);
-      }
-    }
-
-    this.novels = [];
-
-    for (let i = 0; i < Series.MAX_NOVELS; i++) {
-      this.novels.push(new Novel(i));
-    }
-
-    this.currentNovel = this.novels[this.novelIndex];
-    this.completedNovels = [];
-
-    this.currentSentence =
-      this.currentNovel.currentParagraph[this.currentNovel.sentenceIndex];
   }
 
-  setNovel(value: number): void {
-    this.novelIndex = value;
-    localStorage.setItem("novelIndex", String(this.novelIndex));
+  for (let i = 0; i < MAX_NOVELS; i++) {
+    novels.push(new Novel(i));
   }
 
-  setCurrentNovel(): void {
-    this.currentNovel = this.novels[this.novelIndex];
-  }
+  currentNovel = novels[novelIndex];
+  currentSentence = currentNovel.currentParagraph[currentNovel.sentenceIndex];
 
-  setCurrentSentence(): void {
-    this.currentSentence =
-      this.currentNovel.currentParagraph[this.currentNovel.sentenceIndex];
-  }
+  const getCurrentParagraphObject = (): Paragraph => {
+    return currentNovel.currentParagraphObject;
+  };
 
-  nextSentence(): void {
-    // Display text by calling the GameDOM observer's controller
-    this.currentNovel.sentenceIndex++;
+  const getCurrentParagraph = (): ParagraphText => {
+    return currentNovel.currentParagraph;
+  };
+
+  const getCurrentSentence = (): string => {
+    return currentSentence;
+  };
+
+  const getNovelIndex = (): number => {
+    return novelIndex;
+  };
+
+  const getChapterIndex = (): number => {
+    return currentNovel.chapterIndex;
+  };
+
+  const getParagraphIndex = (): number => {
+    return currentNovel.paragraphIndex;
+  };
+
+  const getSentenceIndex = (): number => {
+    return currentNovel.sentenceIndex;
+  };
+
+  const getChapterChanged = (): boolean => {
+    return chapterChanged;
+  };
+
+  const nextSentence = (): void => {
+    currentNovel.sentenceIndex++;
 
     // PLEASE REWRITE THESE UGLY IF STATEMENTS AS METHODS. THANK YOU
     // Starts a new paragraph element if we've gone out of sentenceIndex, aka making a new p tag
-    if (
-      this.currentNovel.sentenceIndex >=
-      this.currentNovel.currentParagraph.length
-    ) {
-      this.currentNovel.sentenceIndex = 0;
-      this.currentNovel.setParagraph(this.currentNovel.paragraphIndex + 1);
+    if (currentNovel.sentenceIndex >= currentNovel.currentParagraph.length) {
+      currentNovel.sentenceIndex = 0;
+      currentNovel.setParagraph(currentNovel.paragraphIndex + 1);
       GameDOM.incrTextContainerIndex();
 
       // Checks if starting a new paragraph would be out of paragraphIndex for the current chapter
-      if (
-        this.currentNovel.paragraphIndex >=
-        this.currentNovel.currentChapter.length
-      ) {
-        this.currentNovel.sentenceIndex = 0;
-        this.currentNovel.setParagraph(0);
-        this.currentNovel.setChapter(this.currentNovel.chapterIndex + 1);
+      if (currentNovel.paragraphIndex >= currentNovel.currentChapter.length) {
+        currentNovel.sentenceIndex = 0;
+        currentNovel.setParagraph(0);
+        currentNovel.setChapter(currentNovel.chapterIndex + 1);
 
-        if (
-          this.currentNovel.chapterIndex >= this.currentNovel.chapters.length
-        ) {
-          this.setNovel(this.novelIndex + 1);
+        if (currentNovel.chapterIndex >= currentNovel.chapters.length) {
+          setNovel(novelIndex + 1);
 
-          if (this.novelIndex < this.novels.length) {
-            this.setCurrentNovel();
+          if (novelIndex < novels.length) {
+            setCurrentNovel();
 
-            this.currentNovel.sentenceIndex = 0;
-            this.currentNovel.setParagraph(0);
-            this.currentNovel.setChapter(0);
+            currentNovel.sentenceIndex = 0;
+            currentNovel.setParagraph(0);
+            currentNovel.setChapter(0);
           }
         }
-        this.toggleChapterChange();
+        toggleChapterChange();
       }
     }
 
     // Setting the current chapter and current paragraph after incrementing (fixing order later)
-    if (!this.isGameOver()) {
-      this.currentNovel.setCurrentChapter();
-      this.currentNovel.setCurrentParagraph();
+    if (!isGameOver()) {
+      currentNovel.setCurrentChapter();
+      currentNovel.setCurrentParagraph();
 
-      this.setCurrentSentence();
+      setCurrentSentence();
     }
-  }
+  };
 
-  checkEmptyParagraph(): void {
-    while (this.currentNovel.currentParagraph.length === 0) {
+  const setNovel = (value: number): void => {
+    novelIndex = value;
+    localStorage.setItem("novelIndex", String(novelIndex));
+  };
+
+  const setChapter = (value: number): void => {
+    currentNovel.setChapter(value);
+  };
+
+  const setParagraph = (value: number): void => {
+    currentNovel.setParagraph(value);
+  };
+
+  const setSentence = (value: number): void => {
+    currentNovel.sentenceIndex = value;
+  };
+
+  const setCurrentNovel = (): void => {
+    currentNovel = novels[novelIndex];
+  };
+
+  const setCurrentChapter = currentNovel.setCurrentChapter;
+  const setCurrentParagraph = currentNovel.setCurrentParagraph;
+
+  const setCurrentSentence = (): void => {
+    currentSentence = currentNovel.currentParagraph[currentNovel.sentenceIndex];
+  };
+
+  const checkEmptyParagraph = (): void => {
+    while (currentNovel.currentParagraph.length === 0) {
       GameDOM.clearText();
 
-      this.currentNovel.sentenceIndex = 0;
+      currentNovel.sentenceIndex = 0;
 
-      let newParagraphIndex: number = this.currentNovel.paragraphIndex + 1;
-      let newChapterIndex: number = this.currentNovel.chapterIndex;
-      let newNovelIndex: number = this.novelIndex;
+      let newParagraphIndex: number = currentNovel.paragraphIndex + 1;
+      let newChapterIndex: number = currentNovel.chapterIndex;
+      let newNovelIndex: number = novelIndex;
 
-      if (newParagraphIndex >= this.currentNovel.currentChapter.length) {
+      if (newParagraphIndex >= currentNovel.currentChapter.length) {
         newParagraphIndex = 0;
-        newChapterIndex = this.currentNovel.chapterIndex + 1;
+        newChapterIndex = currentNovel.chapterIndex + 1;
 
-        if (newChapterIndex >= this.currentNovel.chapters.length) {
+        if (newChapterIndex >= currentNovel.chapters.length) {
           newChapterIndex = 0;
-          newNovelIndex = this.novelIndex + 1;
+          newNovelIndex = novelIndex + 1;
         }
       }
       GameDOM.resetTextContainerIndex();
 
-      this.setNovel(newNovelIndex);
-      this.setCurrentNovel();
+      setNovel(newNovelIndex);
+      setCurrentNovel();
 
-      this.currentNovel.setChapter(newChapterIndex);
-      this.currentNovel.setCurrentChapter();
+      currentNovel.setChapter(newChapterIndex);
+      currentNovel.setCurrentChapter();
 
-      this.currentNovel.setParagraph(newParagraphIndex);
-      this.currentNovel.setCurrentParagraph();
+      currentNovel.setParagraph(newParagraphIndex);
+      currentNovel.setCurrentParagraph();
 
-      this.setCurrentSentence();
+      setCurrentSentence();
     }
-  }
+  };
 
-  isGameOver(): boolean {
-    return this.novelIndex >= this.novels.length;
-  }
+  const isGameOver = (): boolean => {
+    return novelIndex >= novels.length;
+  };
 
-  toggleChapterChange(): void {
-    this.currentNovel.chapterChanged =
-      this.currentNovel.chapterChanged == false;
-  }
+  const toggleChapterChange = (): void => {
+    chapterChanged = chapterChanged == false;
+  };
 
-  addCompletedNovel(value: number): void {
-    this.completedNovels.push(new Novel(value));
-  }
+  const addCompletedNovel = (value: number): void => {
+    completedNovels.push(new Novel(value));
+  };
 
-  addSave(slotIndex: number): {
+  const addSave = (
+    slotIndex: number
+  ): {
     novel: number;
     chapter: number;
     paragraph: number;
-  } {
+  } => {
     const savedSlot = {
-      novel: this.novelIndex,
-      chapter: this.currentNovel.chapterIndex,
-      paragraph: this.currentNovel.paragraphIndex,
+      novel: novelIndex,
+      chapter: currentNovel.chapterIndex,
+      paragraph: currentNovel.paragraphIndex,
     };
-    this.savedSlots[slotIndex] = savedSlot;
+    savedSlots[slotIndex] = savedSlot;
     localStorage.setItem(`slot${slotIndex}`, JSON.stringify(savedSlot));
 
     return savedSlot;
-  }
+  };
 
-  removeSave(slotIndex: number): void {
-    delete this.savedSlots[slotIndex];
-  }
+  const removeSave = (slotIndex: number): void => {
+    delete savedSlots[slotIndex];
+  };
 
-  jumpSave(savedSlot: SavedSlot): void {
-    this.setNovel(savedSlot.novel);
-    this.setCurrentNovel();
+  const jumpSave = (savedSlot: SavedSlot): void => {
+    setNovel(savedSlot.novel);
+    setCurrentNovel();
 
-    this.currentNovel.setChapter(savedSlot.chapter);
+    currentNovel.setChapter(savedSlot.chapter);
 
-    this.currentNovel.setParagraph(savedSlot.paragraph);
-    this.currentNovel.sentenceIndex = 0;
-  }
-}
+    currentNovel.setParagraph(savedSlot.paragraph);
+    currentNovel.sentenceIndex = 0;
+  };
+
+  return {
+    getCurrentParagraphObject,
+    getCurrentParagraph,
+    getCurrentSentence,
+    getNovelIndex,
+    getChapterIndex,
+    getParagraphIndex,
+    getSentenceIndex,
+    getChapterChanged,
+
+    setNovel,
+    setChapter,
+    setParagraph,
+    setSentence,
+    setCurrentNovel,
+    setCurrentChapter,
+    setCurrentParagraph,
+    setCurrentSentence,
+
+    checkEmptyParagraph,
+    nextSentence,
+    isGameOver,
+    toggleChapterChange,
+    addCompletedNovel,
+    addSave,
+    removeSave,
+    jumpSave,
+  };
+})();
 
 class Track {
   audioId: string;
@@ -428,4 +485,4 @@ class Soundtrack {
 }
 
 // export { Novel, Soundtrack };
-export { Series, Soundtrack, knk };
+export { series, Soundtrack };

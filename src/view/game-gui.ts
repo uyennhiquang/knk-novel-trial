@@ -1,28 +1,29 @@
 // Consider making a DOM init that initiates what to display
 // BUGS
-// checkForParagraphOverflow() doesn't clear paragraphs, but only checking for sentence overflow (test on 0-1-0)
+// Clicking jump while the typewriter function is running causes an error with the concat call
+// Jumping -- regardless of mid-sentence or not -- displays the paragraph/sentence belonging to the states before jumping, and then displaying the new state 
 
-import { Series, Soundtrack, knk } from "../model/knk";
+import { series, Soundtrack } from "../model/knk";
 
-const series = new Series();
-let soundtrack = new Soundtrack(series.novelIndex);
+// const series = new Series();
+let soundtrack = new Soundtrack(series.getNovelIndex());
 
 console.log(
   "Init (on first load)\n",
   "Novel:",
-  series.novelIndex,
+  series.getNovelIndex(),
   "\n",
   "Chapter:",
-  series.currentNovel.chapterIndex,
+  series.getChapterIndex(),
   "\n",
   "Paragraph Position:",
-  series.currentNovel.paragraphIndex,
+  series.getParagraphIndex(),
   "\n",
   "Sentence Position:",
-  series.currentNovel.sentenceIndex,
+  series.getSentenceIndex(),
   "\n",
   "Current sentence:",
-  series.currentNovel.currentParagraph[series.currentNovel.sentenceIndex]
+  series.getCurrentSentence()
 );
 
 const GameDOM = (() => {
@@ -45,15 +46,14 @@ const GameDOM = (() => {
 
   const startGame = () => {
     playGame();
-    series.currentNovel.setChapter(0);
-    series.currentNovel.setParagraph(0);
-
-    series.currentNovel.sentenceIndex = 0;
+    series.setChapter(0);
+    series.setParagraph(0);
+    series.setSentence(0);
   };
 
   const continueGame = () => {
     playGame();
-    series.currentNovel.sentenceIndex = 0;
+    series.setSentence(0);
   };
 
   const clearText = () => {
@@ -91,22 +91,19 @@ const GameDOM = (() => {
       // print next sentence/paragraph
       console.log(
         "Novel:",
-        series.novelIndex,
+        series.getNovelIndex(),
         "\n",
         "Chapter:",
-        series.currentNovel.chapterIndex,
+        series.getChapterIndex(),
         "\n",
         "Paragraph Position:",
-        series.currentNovel.paragraphIndex,
+        series.getParagraphIndex(),
         "\n",
         "Sentence Position:",
-        series.currentNovel.sentenceIndex,
-        "\n",
-        "Current paragraph: ",
-        series.currentNovel.currentParagraph,
+        series.getSentenceIndex(),
         "\n",
         "Current sentence:",
-        series.currentNovel.currentParagraph[series.currentNovel.sentenceIndex]
+        series.getCurrentSentence()
       );
     }
   };
@@ -116,7 +113,7 @@ const GameDOM = (() => {
   };
 
   const chapterChangedHandler = () => {
-    if (series.currentNovel.chapterChanged) {
+    if (series.getChapterChanged()) {
       GameDOM.clearText();
       series.toggleChapterChange();
     }
@@ -154,15 +151,15 @@ const ParagraphJump = (() => {
     series.setCurrentNovel();
 
     soundtrack.pauseAudio();
-    soundtrack = new Soundtrack(series.novelIndex);
+    soundtrack = new Soundtrack(series.getNovelIndex());
 
-    series.currentNovel.setChapter(Number(inputChapter.value));
-    series.currentNovel.setCurrentChapter();
+    series.setChapter(Number(inputChapter.value));
+    series.setCurrentChapter();
 
-    series.currentNovel.setParagraph(Number(inputParagraph.value));
-    series.currentNovel.setCurrentParagraph();
+    series.setParagraph(Number(inputParagraph.value));
+    series.setCurrentParagraph();
 
-    series.currentNovel.sentenceIndex = 0;
+    series.setSentence(0);
 
     series.setCurrentSentence();
   };
@@ -173,6 +170,9 @@ const ParagraphJump = (() => {
 const GameWindow = (() => {
   const gameWindow = document.getElementById("window--text");
 
+  /**
+   * In a normal game workflow where the user is in the middle of playing, the action of moving to the next sentence happens "before" the overflow check (due to the event being a click). Thus, when the sentence being updated is the beginning of the new chapter, this is the only time the function should behave logically, otherwise you risk clearing a screen when the user is half-way through a paragraph, which is undesirable.
+   */
   const checkForParagraphOverflow = () => {
     const windowVertPadding =
       2 * Number(window.getComputedStyle(gameWindow).paddingTop.slice(0, -2));
@@ -182,7 +182,7 @@ const GameWindow = (() => {
 
     if (GameDOM.textContainer.children.length > 0) {
       const p = document.createElement("p");
-      const currentParagraphStr = series.currentNovel.currentParagraph
+      const currentParagraphStr = series.getCurrentParagraph()
         .map((sentence) => sentence)
         .join(" ");
       p.innerHTML = currentParagraphStr;
@@ -190,7 +190,6 @@ const GameWindow = (() => {
 
       if (GameDOM.textContainer.offsetHeight >= MAX_CONTAINER_HEIGHT) {
         GameDOM.clearText();
-        console.log("should only be run when new paragraph overflow blah blah");
       } else {
         GameDOM.textContainer.removeChild(GameDOM.textContainer.lastChild);
       }
@@ -215,12 +214,14 @@ const GameWindow = (() => {
           series.checkEmptyParagraph();
 
           GameDOM.chapterChangedHandler();
-          GameWindow.checkForParagraphOverflow();
+
+          if (series.getSentenceIndex() == 0)
+            GameWindow.checkForParagraphOverflow();
 
           GameDOM.textContainer.appendChild(document.createElement("p"));
 
-          soundtrack.playAudio(series.currentNovel.currentParagraphObject);
-          GameDOM.typeWriter(series.currentSentence);
+          soundtrack.playAudio(series.getCurrentParagraphObject());
+          GameDOM.typeWriter(series.getCurrentSentence());
         } else {
           GameDOM.speedUp();
         }
@@ -255,90 +256,90 @@ const GameWindow = (() => {
   };
 })();
 
-const SaveDOM = (() => {
-  const saveBtn = document.getElementById("button--save");
-  const loadBtn = document.getElementById("button--load");
-  const savedSlotsElt = document
-    .getElementById("save-slots")
-    .getElementsByTagName("td");
-  const saveSectionElt = document.getElementById("section--save");
+// const SaveDOM = (() => {
+//   const saveBtn = document.getElementById("button--save");
+//   const loadBtn = document.getElementById("button--load");
+//   const savedSlotsElt = document
+//     .getElementById("save-slots")
+//     .getElementsByTagName("td");
+//   const saveSectionElt = document.getElementById("section--save");
 
-  const defaultMessage = "waiting for action...";
-  saveSectionElt.lastChild.textContent = defaultMessage;
+//   const defaultMessage = "waiting for action...";
+//   saveSectionElt.lastChild.textContent = defaultMessage;
 
-  let isSaving = false;
-  let isLoading = false;
+//   let isSaving = false;
+//   let isLoading = false;
 
-  saveBtn.addEventListener("click", () => {
-    saveSectionElt.lastChild.textContent = "Select a slot below";
-    isSaving = true;
-  });
+//   saveBtn.addEventListener("click", () => {
+//     saveSectionElt.lastChild.textContent = "Select a slot below";
+//     isSaving = true;
+//   });
 
-  loadBtn.addEventListener("click", () => {
-    saveSectionElt.lastChild.textContent = "Select a slot below";
-    isLoading = true;
-  });
+//   loadBtn.addEventListener("click", () => {
+//     saveSectionElt.lastChild.textContent = "Select a slot below";
+//     isLoading = true;
+//   });
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      if (isSaving) {
-        isSaving = false;
-      } else if (isLoading) {
-        isLoading = false;
-      }
-      saveSectionElt.lastChild.textContent = defaultMessage;
-    }
-  });
+//   document.addEventListener("keydown", (e) => {
+//     if (e.key === "Escape") {
+//       if (isSaving) {
+//         isSaving = false;
+//       } else if (isLoading) {
+//         isLoading = false;
+//       }
+//       saveSectionElt.lastChild.textContent = defaultMessage;
+//     }
+//   });
 
-  for (let i = 0; i < savedSlotsElt.length; i++) {
-    savedSlotsElt[i].addEventListener("click", () => {
-      if (isSaving) {
-        series.addSave(i);
-        console.log(series.savedSlots);
+//   for (let i = 0; i < savedSlotsElt.length; i++) {
+//     savedSlotsElt[i].addEventListener("click", () => {
+//       if (isSaving) {
+//         series.addSave(i);
+//         console.log(series.savedSlots);
 
-        const novelObj = knk[series.savedSlots[i].novel];
-        const title = novelObj.title;
-        const chapterIndex = series.savedSlots[i].chapter;
-        const paragraphIndex = series.savedSlots[i].paragraph;
+//         const novelObj = knk[series.savedSlots[i].novel];
+//         const title = novelObj.title;
+//         const chapterIndex = series.savedSlots[i].chapter;
+//         const paragraphIndex = series.savedSlots[i].paragraph;
 
-        savedSlotsElt[i].textContent = `${title} - Chapter ${chapterIndex}`;
-        isSaving = false;
-        saveSectionElt.lastChild.textContent = defaultMessage;
-      } else if (isLoading) {
-        console.log("loading clicked");
-        GameDOM.clearText();
-        GameDOM.textContainer.appendChild(document.createElement("p"));
+//         savedSlotsElt[i].textContent = `${title} - Chapter ${chapterIndex}`;
+//         isSaving = false;
+//         saveSectionElt.lastChild.textContent = defaultMessage;
+//       } else if (isLoading) {
+//         console.log("loading clicked");
+//         GameDOM.clearText();
+//         GameDOM.textContainer.appendChild(document.createElement("p"));
 
-        series.jumpSave(series.savedSlots[i]);
+//         series.jumpSave(series.savedSlots[i]);
 
-        soundtrack.pauseAudio();
-        soundtrack = new Soundtrack(series.novelIndex);
+//         soundtrack.pauseAudio();
+//         soundtrack = new Soundtrack(series.getNovelIndex());
 
-        isLoading = false;
-        saveSectionElt.lastChild.textContent = defaultMessage;
-      }
-    });
-  }
-})();
+//         isLoading = false;
+//         saveSectionElt.lastChild.textContent = defaultMessage;
+//       }
+//     });
+//   }
+// })();
 
-const InitDOM = (() => {
-  // Display saved slots
-  const savedSlotsElt = document
-    .getElementById("save-slots")
-    .getElementsByTagName("td");
+// const InitDOM = (() => {
+//   // Display saved slots
+//   const savedSlotsElt = document
+//     .getElementById("save-slots")
+//     .getElementsByTagName("td");
 
-  for (let i = 0; i < series.savedSlots.length; i++) {
-    if (series.savedSlots[i] === null) {
-      savedSlotsElt[i].textContent = "empty";
-    } else {
-      const novelObj = knk[series.savedSlots[i].novel];
-      const title = novelObj.title;
-      const chapterIndex = series.savedSlots[i].chapter;
-      const paragraphIndex = series.savedSlots[i].paragraph;
+//   for (let i = 0; i < series.savedSlots.length; i++) {
+//     if (series.savedSlots[i] === null) {
+//       savedSlotsElt[i].textContent = "empty";
+//     } else {
+//       const novelObj = knk[series.savedSlots[i].novel];
+//       const title = novelObj.title;
+//       const chapterIndex = series.savedSlots[i].chapter;
+//       const paragraphIndex = series.savedSlots[i].paragraph;
 
-      savedSlotsElt[i].textContent = `${title} - Chapter ${chapterIndex}`;
-    }
-  }
-})();
+//       savedSlotsElt[i].textContent = `${title} - Chapter ${chapterIndex}`;
+//     }
+//   }
+// })();
 
 export { GameDOM, GameWindow };
