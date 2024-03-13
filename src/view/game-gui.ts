@@ -1,7 +1,9 @@
 // Consider making a DOM init that initiates what to display
 // BUGS
 // Clicking jump while the typewriter function is running causes an error with the concat call
-// Jumping -- regardless of mid-sentence or not -- displays the paragraph/sentence belonging to the states before jumping, and then displaying the new state 
+// Bugs with paragraphObject
+// Jumping audio is incorrect.
+// Jumping while text is running causes bug
 
 import { series, Soundtrack } from "../model/knk";
 
@@ -160,7 +162,6 @@ const ParagraphJump = (() => {
     series.setCurrentParagraph();
 
     series.setSentence(0);
-
     series.setCurrentSentence();
   };
 

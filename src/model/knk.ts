@@ -49,9 +49,7 @@ class Novel {
     }
 
     // Initializes the current chapter and paragraph upon creating a Novel instance
-    // this.setCurrentChapter(this.chapterIndex);
     this.setCurrentChapter();
-    // this.setCurrentParagraph(this.paragraphIndex);
     this.setCurrentParagraph();
   }
 
@@ -87,7 +85,6 @@ const series = (() => {
   const MAX_NOVELS: number = 2;
   const novels: Novel[] = [];
   const completedNovels: Novel[] = [];
-  // const savedSlots: SavedSlot[] = [];
 
   let novelIndex: number = 0;
   let currentNovel: Novel = null;
@@ -210,8 +207,13 @@ const series = (() => {
     currentNovel = novels[novelIndex];
   };
 
-  const setCurrentChapter = currentNovel.setCurrentChapter;
-  const setCurrentParagraph = currentNovel.setCurrentParagraph;
+  const setCurrentChapter = (): void => {
+    currentNovel.setCurrentChapter();
+  };
+
+  const setCurrentParagraph = (): void => {
+    currentNovel.setCurrentParagraph();
+  };
 
   const setCurrentSentence = (): void => {
     currentSentence = currentNovel.currentParagraph[currentNovel.sentenceIndex];
