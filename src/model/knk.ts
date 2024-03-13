@@ -21,9 +21,9 @@ class Novel {
   currentParagraph: ParagraphText;
   currentParagraphObject: Paragraph;
 
-  sentenceIndex: number;
   chapterIndex: number;
   paragraphIndex: number;
+  sentenceIndex: number;
 
   constructor(novelIndex: number) {
     this.chapters = knk[novelIndex]["chapters"];
@@ -31,24 +31,11 @@ class Novel {
     this.currentParagraph = null;
     this.currentParagraphObject = null;
 
+    // Have to set to the program's variable temporarily (without affecting the localStorage) so it doesn't crash
+    this.chapterIndex = 0;
+    this.paragraphIndex = 0;
     this.sentenceIndex = 0;
-    this.chapterIndex = null;
-    this.paragraphIndex = null;
 
-    if (typeof localStorage.getItem("paragraphIndex") !== "string") {
-      this.paragraphIndex = 0;
-      localStorage.setItem("paragraphIndex", String(this.paragraphIndex));
-    } else {
-      this.paragraphIndex = Number(localStorage.getItem("paragraphIndex"));
-    }
-    if (typeof localStorage.getItem("chapterIndex") !== "string") {
-      this.chapterIndex = 0;
-      localStorage.setItem("chapterIndex", String(this.chapterIndex));
-    } else {
-      this.chapterIndex = Number(localStorage.getItem("chapterIndex"));
-    }
-
-    // Initializes the current chapter and paragraph upon creating a Novel instance
     this.setCurrentChapter();
     this.setCurrentParagraph();
   }
@@ -87,17 +74,12 @@ const series = (() => {
   const completedNovels: Novel[] = [];
 
   let novelIndex: number = 0;
+  localStorage.setItem("novelIndex", String(novelIndex));
+
   let currentNovel: Novel = null;
   let chapterChanged: boolean = false;
 
   let currentSentence: string = "";
-
-  if (typeof localStorage.getItem("novelIndex") !== "string") {
-    novelIndex = 0;
-    localStorage.setItem("novelIndex", String(novelIndex));
-  } else {
-    novelIndex = Number(localStorage.getItem("novelIndex"));
-  }
 
   const savedSlots: SavedSlot[] = Array(MAX_SLOTS).fill(null);
   for (let i = 0; i < MAX_SLOTS; i++) {
@@ -146,6 +128,39 @@ const series = (() => {
     return chapterChanged;
   };
 
+  const setNovel = (value: number): void => {
+    novelIndex = value;
+    localStorage.setItem("novelIndex", String(novelIndex));
+  };
+
+  const setChapter = (value: number): void => {
+    currentNovel.setChapter(value);
+  };
+
+  const setParagraph = (value: number): void => {
+    currentNovel.setParagraph(value);
+  };
+
+  const setSentence = (value: number): void => {
+    currentNovel.sentenceIndex = value;
+  };
+
+  const setCurrentNovel = (): void => {
+    currentNovel = novels[novelIndex];
+  };
+
+  const setCurrentChapter = (): void => {
+    currentNovel.setCurrentChapter();
+  };
+
+  const setCurrentParagraph = (): void => {
+    currentNovel.setCurrentParagraph();
+  };
+
+  const setCurrentSentence = (): void => {
+    currentSentence = currentNovel.currentParagraph[currentNovel.sentenceIndex];
+  };
+
   const nextSentence = (): void => {
     currentNovel.sentenceIndex++;
 
@@ -185,40 +200,6 @@ const series = (() => {
       setCurrentSentence();
     }
   };
-
-  const setNovel = (value: number): void => {
-    novelIndex = value;
-    localStorage.setItem("novelIndex", String(novelIndex));
-  };
-
-  const setChapter = (value: number): void => {
-    currentNovel.setChapter(value);
-  };
-
-  const setParagraph = (value: number): void => {
-    currentNovel.setParagraph(value);
-  };
-
-  const setSentence = (value: number): void => {
-    currentNovel.sentenceIndex = value;
-  };
-
-  const setCurrentNovel = (): void => {
-    currentNovel = novels[novelIndex];
-  };
-
-  const setCurrentChapter = (): void => {
-    currentNovel.setCurrentChapter();
-  };
-
-  const setCurrentParagraph = (): void => {
-    currentNovel.setCurrentParagraph();
-  };
-
-  const setCurrentSentence = (): void => {
-    currentSentence = currentNovel.currentParagraph[currentNovel.sentenceIndex];
-  };
-
   const checkEmptyParagraph = (): void => {
     while (currentNovel.currentParagraph.length === 0) {
       GameDOM.clearText();
@@ -297,6 +278,31 @@ const series = (() => {
     currentNovel.sentenceIndex = 0;
   };
 
+  const _setGameState = (novelIndex: number, chapterIndex: number, paragraphIndex: number) => {
+    setNovel(novelIndex);
+    setCurrentNovel();
+
+    currentNovel.setChapter(chapterIndex);
+    currentNovel.setParagraph(paragraphIndex);
+    currentNovel.sentenceIndex = 0;
+
+    currentNovel.setCurrentChapter();
+    currentNovel.setCurrentParagraph();
+    setCurrentSentence();
+  }
+
+  const startGame = (): void => {
+    _setGameState(0, 0, 0)
+  }
+
+  const continueGame = (): void => {
+    const novelIndex = Number(localStorage.getItem("novelIndex"));
+    const chapterIndex = Number(localStorage.getItem("chapterIndex"));
+    const paragraphIndex = Number(localStorage.getItem("paragraphIndex"));
+
+    _setGameState(novelIndex, chapterIndex, paragraphIndex);
+  };
+
   return {
     getCurrentParagraphObject,
     getCurrentParagraph,
@@ -316,6 +322,8 @@ const series = (() => {
     setCurrentParagraph,
     setCurrentSentence,
 
+    startGame,
+    continueGame,
     checkEmptyParagraph,
     nextSentence,
     isGameOver,

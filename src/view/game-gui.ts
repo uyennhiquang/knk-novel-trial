@@ -2,12 +2,11 @@
 // BUGS
 // Clicking jump while the typewriter function is running causes an error with the concat call
 // Bugs with paragraphObject
-// Jumping audio is incorrect.
-// Jumping while text is running causes bug
+// Jumping audio is incorrect
+// Continuing the game will start from the next sentence due to the order of playGame()
 
 import { series, Soundtrack } from "../model/knk";
 
-// const series = new Series();
 let soundtrack = new Soundtrack(series.getNovelIndex());
 
 console.log(
@@ -48,14 +47,12 @@ const GameDOM = (() => {
 
   const startGame = () => {
     playGame();
-    series.setChapter(0);
-    series.setParagraph(0);
-    series.setSentence(0);
+    series.startGame();
   };
 
   const continueGame = () => {
     playGame();
-    series.setSentence(0);
+    series.continueGame();
   };
 
   const clearText = () => {
