@@ -2,8 +2,8 @@
 // BUGS
 // Clicking jump while the typewriter function is running causes an error with the concat call
 // Bugs with paragraphObject
-// Jumping audio is incorrect
 // Continuing the game will start from the next sentence due to the order of playGame()
+// Jumping and then refreshing does not update the localStorage to the progress after jumping audio-wise. Probably because how the soundtrack is set to 0 and not updated even when continuing.
 
 import { series, Soundtrack } from "../model/knk";
 
@@ -48,11 +48,17 @@ const GameDOM = (() => {
   const startGame = () => {
     playGame();
     series.startGame();
+    
+    soundtrack.pauseAudio();
+    soundtrack = new Soundtrack(series.getNovelIndex());
   };
 
   const continueGame = () => {
     playGame();
     series.continueGame();
+    
+    soundtrack.pauseAudio();
+    soundtrack = new Soundtrack(series.getNovelIndex());
   };
 
   const clearText = () => {
@@ -86,24 +92,6 @@ const GameDOM = (() => {
       charAt = 0;
       textSpeed = DEFAULT_TEXT_SPEED;
       series.nextSentence();
-
-      // print next sentence/paragraph
-      console.log(
-        "Novel:",
-        series.getNovelIndex(),
-        "\n",
-        "Chapter:",
-        series.getChapterIndex(),
-        "\n",
-        "Paragraph Position:",
-        series.getParagraphIndex(),
-        "\n",
-        "Sentence Position:",
-        series.getSentenceIndex(),
-        "\n",
-        "Current sentence:",
-        series.getCurrentSentence()
-      );
     }
   };
 
@@ -180,7 +168,8 @@ const GameWindow = (() => {
 
     if (GameDOM.textContainer.children.length > 0) {
       const p = document.createElement("p");
-      const currentParagraphStr = series.getCurrentParagraph()
+      const currentParagraphStr = series
+        .getCurrentParagraph()
         .map((sentence) => sentence)
         .join(" ");
       p.innerHTML = currentParagraphStr;

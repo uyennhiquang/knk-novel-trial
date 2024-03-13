@@ -74,7 +74,6 @@ const series = (() => {
   const completedNovels: Novel[] = [];
 
   let novelIndex: number = 0;
-  localStorage.setItem("novelIndex", String(novelIndex));
 
   let currentNovel: Novel = null;
   let chapterChanged: boolean = false;
@@ -278,7 +277,11 @@ const series = (() => {
     currentNovel.sentenceIndex = 0;
   };
 
-  const _setGameState = (novelIndex: number, chapterIndex: number, paragraphIndex: number) => {
+  const _setGameState = (
+    novelIndex: number,
+    chapterIndex: number,
+    paragraphIndex: number
+  ) => {
     setNovel(novelIndex);
     setCurrentNovel();
 
@@ -289,11 +292,11 @@ const series = (() => {
     currentNovel.setCurrentChapter();
     currentNovel.setCurrentParagraph();
     setCurrentSentence();
-  }
+  };
 
   const startGame = (): void => {
-    _setGameState(0, 0, 0)
-  }
+    _setGameState(0, 0, 0);
+  };
 
   const continueGame = (): void => {
     const novelIndex = Number(localStorage.getItem("novelIndex"));
