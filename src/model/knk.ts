@@ -451,7 +451,7 @@ class Soundtrack {
       } else {
         let unique = true;
 
-        // Iterate over old track list first to remove tracks that aren't part of the new track list
+        // TODO: Add a comment explaining why the 2 for-loops below are needed 
         this.currentTrackList.trackIds.forEach((id) => {
           if (!paragraphObject.audioId.includes(id)) {
             this.currentTrackList.removeTrackWithId(id);
@@ -460,7 +460,6 @@ class Soundtrack {
           }
         });
 
-        // Iterate over new track list first to add tracks that aren't part of the old track list
         paragraphObject.audioId.forEach((id) => {
           if (!this.currentTrackList.trackIds.includes(id)) {
             this.currentTrackList.addToTrackList(
