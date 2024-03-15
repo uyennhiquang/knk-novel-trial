@@ -1,9 +1,7 @@
 // Consider making a DOM init that initiates what to display
 // BUGS
-// Clicking jump while the typewriter function is running causes an error with the concat call
 // Bugs with paragraphObject
 // Continuing the game will start from the next sentence due to the order of playGame()
-// Jumping and then refreshing does not update the localStorage to the progress after jumping audio-wise. Probably because how the soundtrack is set to 0 and not updated even when continuing.
 
 import { series, Soundtrack } from "../model/knk";
 
@@ -35,9 +33,11 @@ const GameDOM = (() => {
 
   // Consider encapsulating these by making functions that update these states, but not exposing them
   let textSpeed = DEFAULT_TEXT_SPEED;
-  let textContainerIndex = 0;
   let playing = false;
   let running = false;
+
+  let textContainerIndex = 0;
+  let typeWriterTimeOut;
   let charAt = 0;
 
   const playGame = () => {
@@ -48,7 +48,7 @@ const GameDOM = (() => {
   const startGame = () => {
     playGame();
     series.startGame();
-    
+
     soundtrack.pauseAudio();
     soundtrack = new Soundtrack(series.getNovelIndex());
   };
@@ -56,7 +56,7 @@ const GameDOM = (() => {
   const continueGame = () => {
     playGame();
     series.continueGame();
-    
+
     soundtrack.pauseAudio();
     soundtrack = new Soundtrack(series.getNovelIndex());
   };
@@ -80,11 +80,10 @@ const GameDOM = (() => {
    */
   const typeWriter = (text: string): void => {
     GameDOM.running = true;
-
     if (charAt < text.length) {
       textContainer.children[`${textContainerIndex}`].innerHTML += text[charAt];
       charAt++;
-      setTimeout(() => typeWriter(text), textSpeed);
+      typeWriterTimeOut = setTimeout(() => typeWriter(text), textSpeed);
     } else if (charAt === text.length) {
       textContainer.children[`${textContainerIndex}`].innerHTML += " ";
 
@@ -116,6 +115,7 @@ const GameDOM = (() => {
     continueGame,
     clearText,
     typeWriter,
+    typeWriterTimeOut,
     speedUp,
     chapterChangedHandler,
     incrTextContainerIndex,
@@ -150,7 +150,9 @@ const ParagraphJump = (() => {
     series.setCurrentSentence();
   };
 
-  buttonElt.addEventListener("click", jump);
+  buttonElt.addEventListener("click", () => {
+    if (!GameDOM.running) jump();
+  });
 })();
 
 const GameWindow = (() => {
