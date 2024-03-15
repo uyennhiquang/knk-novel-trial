@@ -163,7 +163,7 @@ const series = (() => {
   const nextSentence = (): void => {
     currentNovel.sentenceIndex++;
 
-    // PLEASE REWRITE THESE UGLY IF STATEMENTS AS METHODS. THANK YOU
+    // PLEASE CONSIDER REWRITE THESE UGLY IF STATEMENTS AS METHODS. THANK YOU
     // Starts a new paragraph element if we've gone out of sentenceIndex, aka making a new p tag
     if (currentNovel.sentenceIndex >= currentNovel.currentParagraph.length) {
       currentNovel.sentenceIndex = 0;

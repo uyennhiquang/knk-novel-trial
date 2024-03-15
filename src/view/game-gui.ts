@@ -90,6 +90,8 @@ const GameDOM = (() => {
       GameDOM.running = false;
       charAt = 0;
       textSpeed = DEFAULT_TEXT_SPEED;
+      
+      // In its current state, this has to placed inside the typeWriter definition. Has something to do with the textContainer index being incremented inside this.
       series.nextSentence();
     }
   };
@@ -211,6 +213,7 @@ const GameWindow = (() => {
 
           soundtrack.playAudio(series.getCurrentParagraphObject());
           GameDOM.typeWriter(series.getCurrentSentence());
+          
         } else {
           GameDOM.speedUp();
         }
