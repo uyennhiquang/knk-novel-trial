@@ -90,9 +90,9 @@ const GameDOM = (() => {
       GameDOM.running = false;
       charAt = 0;
       textSpeed = DEFAULT_TEXT_SPEED;
-      
+
       // In its current state, this has to placed inside the typeWriter definition. Has something to do with the textContainer index being incremented inside this.
-      series.nextSentence();
+      series.incrementSentence();
     }
   };
 
@@ -189,19 +189,21 @@ const GameWindow = (() => {
 
   /**
    * An eventHandler when clicking the gameWindow. The game "mechanic" follows the workflow below:
-   * 1. Check for empty paragraph
-   * This has to be the first thing as the next 2 actions depend on the outcome of this function. In a non-edge case (user continuing the game), after the nextSentence() method is invoked in typeWriter, the current "sentence"/paragraph is set, which may or may be empty. If it is empty, it has to be dealt with before moving onto the other parts below.
-   * 2. Clear text if we just moved onto the next chapter
+   * 1. Check for position validity of the game's variables and increment/set accordingly.
+   * 2. Check for empty paragraph
+   * Firstly, this has to be done after the first thing in case, otherwise the checking might move us to an empty paragraph. Secondly, this has to be the second-most thing as the next 2 actions depend on the outcome of this function. In a non-edge case (user continuing the game), after the nextSentence() method is invoked in typeWriter, the current "sentence"/paragraph is set, which may or may be empty. If it is empty, it has to be dealt with before moving onto the other parts below.
+   * 3. Clear text if we just moved onto the next chapter
    * Has to be placed before the typeWriter call, otherwise it'll clear the text once typeWriter is done executing.
-   * 3. Check for paragraph overflow
-   * 4. Display text
+   * 4. Check for paragraph overflow
+   * 5. Display text
    * This HAS to be the very last thing that happens due to how disjointed the functions/methods for checking whether it is safe to display the sentence. Basically, every failsafe method has to be executed to ensure that there is a valid sentence and <p> tag.
-   * 4b. Call model to update the next sentence
+   * 5b. Call model to increment the sentence index
    */
   const playGame = () => {
     if (GameDOM.playing) {
       if (!series.isGameOver()) {
         if (!GameDOM.running) {
+          series.checkPositionValidity(); // Has to exist so game doesn't continue on the next sentence when changing paragraph
           series.checkEmptyParagraph();
 
           GameDOM.chapterChangedHandler();
@@ -209,11 +211,11 @@ const GameWindow = (() => {
           if (series.getSentenceIndex() == 0)
             GameWindow.checkForParagraphOverflow();
 
+          // Consider putting this inside the typeWriter somehow
           GameDOM.textContainer.appendChild(document.createElement("p"));
 
           soundtrack.playAudio(series.getCurrentParagraphObject());
           GameDOM.typeWriter(series.getCurrentSentence());
-          
         } else {
           GameDOM.speedUp();
         }

@@ -160,11 +160,7 @@ const series = (() => {
     currentSentence = currentNovel.currentParagraph[currentNovel.sentenceIndex];
   };
 
-  const nextSentence = (): void => {
-    currentNovel.sentenceIndex++;
-
-    // PLEASE CONSIDER REWRITE THESE UGLY IF STATEMENTS AS METHODS. THANK YOU
-    // Starts a new paragraph element if we've gone out of sentenceIndex, aka making a new p tag
+  const checkPositionValidity = (): void => {
     if (currentNovel.sentenceIndex >= currentNovel.currentParagraph.length) {
       currentNovel.sentenceIndex = 0;
       currentNovel.setParagraph(currentNovel.paragraphIndex + 1);
@@ -198,6 +194,10 @@ const series = (() => {
 
       setCurrentSentence();
     }
+  };
+
+  const incrementSentence = (): void => {
+    currentNovel.sentenceIndex++;
   };
   const checkEmptyParagraph = (): void => {
     while (currentNovel.currentParagraph.length === 0) {
@@ -328,7 +328,8 @@ const series = (() => {
     startGame,
     continueGame,
     checkEmptyParagraph,
-    nextSentence,
+    checkPositionValidity,
+    incrementSentence,
     isGameOver,
     toggleChapterChange,
     addCompletedNovel,
@@ -451,7 +452,7 @@ class Soundtrack {
       } else {
         let unique = true;
 
-        // TODO: Add a comment explaining why the 2 for-loops below are needed 
+        // TODO: Add a comment explaining why the 2 for-loops below are needed
         this.currentTrackList.trackIds.forEach((id) => {
           if (!paragraphObject.audioId.includes(id)) {
             this.currentTrackList.removeTrackWithId(id);
