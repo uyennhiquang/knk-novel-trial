@@ -164,7 +164,9 @@ const series = (() => {
     if (currentNovel.sentenceIndex >= currentNovel.currentParagraph.length) {
       currentNovel.sentenceIndex = 0;
       currentNovel.setParagraph(currentNovel.paragraphIndex + 1);
+
       GameDOM.incrTextContainerIndex();
+      // GameDOM.textContainer.appendChild(document.createElement("p"));
 
       // Checks if starting a new paragraph would be out of paragraphIndex for the current chapter
       if (currentNovel.paragraphIndex >= currentNovel.currentChapter.length) {

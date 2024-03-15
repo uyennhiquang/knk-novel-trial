@@ -76,10 +76,14 @@ const GameDOM = (() => {
 
   /**
    * The typeWriter() function works by using setTimeout() to call it in interval -- each time typeWriter() is called it adds 1 letter to the specific <p> (indicated by textContainerIndex) inside the textContainer div.
-   * @param text sentence text
+   * @param text - sentence text
    */
   const typeWriter = (text: string): void => {
     GameDOM.running = true;
+    if (textContainer.children.length-1 < textContainerIndex) {
+      GameDOM.textContainer.appendChild(document.createElement("p"));
+    }
+
     if (charAt < text.length) {
       textContainer.children[`${textContainerIndex}`].innerHTML += text[charAt];
       charAt++;
@@ -210,9 +214,6 @@ const GameWindow = (() => {
 
           if (series.getSentenceIndex() == 0)
             GameWindow.checkForParagraphOverflow();
-
-          // Consider putting this inside the typeWriter somehow
-          GameDOM.textContainer.appendChild(document.createElement("p"));
 
           soundtrack.playAudio(series.getCurrentParagraphObject());
           GameDOM.typeWriter(series.getCurrentSentence());
