@@ -4,6 +4,7 @@
 // Continuing the game will start from the next sentence due to the order of playGame()
 
 import { series, Soundtrack } from "../model/knk";
+import { seriesData } from "../model/seriesData";
 
 let soundtrack = new Soundtrack(series.getNovelIndex());
 
@@ -80,7 +81,7 @@ const GameDOM = (() => {
    */
   const typeWriter = (text: string): void => {
     GameDOM.running = true;
-    if (textContainer.children.length-1 < textContainerIndex) {
+    if (textContainer.children.length - 1 < textContainerIndex) {
       GameDOM.textContainer.appendChild(document.createElement("p"));
     }
 
@@ -111,6 +112,11 @@ const GameDOM = (() => {
     }
   };
 
+  const novelChangedHandler = () => {
+    soundtrack.pauseAudio();
+    soundtrack = new Soundtrack(series.getNovelIndex());
+  }  
+
   return {
     gameScreen,
     textContainer,
@@ -124,6 +130,7 @@ const GameDOM = (() => {
     typeWriterTimeOut,
     speedUp,
     chapterChangedHandler,
+    novelChangedHandler,
     incrTextContainerIndex,
     resetTextContainerIndex,
   };
@@ -251,90 +258,94 @@ const GameWindow = (() => {
   };
 })();
 
-// const SaveDOM = (() => {
-//   const saveBtn = document.getElementById("button--save");
-//   const loadBtn = document.getElementById("button--load");
-//   const savedSlotsElt = document
-//     .getElementById("save-slots")
-//     .getElementsByTagName("td");
-//   const saveSectionElt = document.getElementById("section--save");
+const SaveDOM = (() => {
+  const saveBtn = document.getElementById("button--save");
+  const loadBtn = document.getElementById("button--load");
+  const savedSlotsElt = document
+    .getElementById("save-slots")
+    .getElementsByTagName("td");
+  const saveSectionElt = document.getElementById("section--save");
 
-//   const defaultMessage = "waiting for action...";
-//   saveSectionElt.lastChild.textContent = defaultMessage;
+  const defaultMessage = "waiting for action...";
+  saveSectionElt.lastChild.textContent = defaultMessage;
 
-//   let isSaving = false;
-//   let isLoading = false;
+  let isSaving = false;
+  let isLoading = false;
 
-//   saveBtn.addEventListener("click", () => {
-//     saveSectionElt.lastChild.textContent = "Select a slot below";
-//     isSaving = true;
-//   });
+  saveBtn.addEventListener("click", () => {
+    saveSectionElt.lastChild.textContent = "Select a slot below";
+    isSaving = true;
+  });
 
-//   loadBtn.addEventListener("click", () => {
-//     saveSectionElt.lastChild.textContent = "Select a slot below";
-//     isLoading = true;
-//   });
+  loadBtn.addEventListener("click", () => {
+    saveSectionElt.lastChild.textContent = "Select a slot below";
+    isLoading = true;
+  });
 
-//   document.addEventListener("keydown", (e) => {
-//     if (e.key === "Escape") {
-//       if (isSaving) {
-//         isSaving = false;
-//       } else if (isLoading) {
-//         isLoading = false;
-//       }
-//       saveSectionElt.lastChild.textContent = defaultMessage;
-//     }
-//   });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (isSaving) {
+        isSaving = false;
+      } else if (isLoading) {
+        isLoading = false;
+      }
+      saveSectionElt.lastChild.textContent = defaultMessage;
+    }
+  });
 
-//   for (let i = 0; i < savedSlotsElt.length; i++) {
-//     savedSlotsElt[i].addEventListener("click", () => {
-//       if (isSaving) {
-//         series.addSave(i);
-//         console.log(series.savedSlots);
+  for (let i = 0; i < savedSlotsElt.length; i++) {
+    savedSlotsElt[i].addEventListener("click", () => {
+      if (isSaving) {
+        series.addSave(i);
+        console.log(series.getSavedSlots());
 
-//         const novelObj = knk[series.savedSlots[i].novel];
-//         const title = novelObj.title;
-//         const chapterIndex = series.savedSlots[i].chapter;
-//         const paragraphIndex = series.savedSlots[i].paragraph;
+        const novelObj = seriesData[series.getSavedSlots()[i].novel];
+        const title = novelObj.title;
+        const chapterIndex = series.getSavedSlots()[i].chapter;
 
-//         savedSlotsElt[i].textContent = `${title} - Chapter ${chapterIndex}`;
-//         isSaving = false;
-//         saveSectionElt.lastChild.textContent = defaultMessage;
-//       } else if (isLoading) {
-//         console.log("loading clicked");
-//         GameDOM.clearText();
-//         GameDOM.textContainer.appendChild(document.createElement("p"));
+        savedSlotsElt[i].textContent = `${title} - Chapter ${chapterIndex}`;
+        isSaving = false;
+        saveSectionElt.lastChild.textContent = defaultMessage;
 
-//         series.jumpSave(series.savedSlots[i]);
+      // Bandaid fix when player tries to load while the text is running 
+      } else if (isLoading && !GameDOM.running) {
+        console.log("loading clicked");
+        GameDOM.clearText();
+        GameDOM.textContainer.appendChild(document.createElement("p"));
 
-//         soundtrack.pauseAudio();
-//         soundtrack = new Soundtrack(series.getNovelIndex());
+        series.jumpSave(series.getSavedSlots()[i]);
 
-//         isLoading = false;
-//         saveSectionElt.lastChild.textContent = defaultMessage;
-//       }
-//     });
-//   }
-// })();
+        soundtrack.pauseAudio();
+        soundtrack = new Soundtrack(series.getNovelIndex());
 
-// const InitDOM = (() => {
-//   // Display saved slots
-//   const savedSlotsElt = document
-//     .getElementById("save-slots")
-//     .getElementsByTagName("td");
+        isLoading = false;
+        saveSectionElt.lastChild.textContent = defaultMessage;
+        
+        GameDOM.typeWriter(series.getCurrentSentence());
+        soundtrack.playAudio(series.getCurrentParagraphObject());
+      }
+    });
+  }
+})();
 
-//   for (let i = 0; i < series.savedSlots.length; i++) {
-//     if (series.savedSlots[i] === null) {
-//       savedSlotsElt[i].textContent = "empty";
-//     } else {
-//       const novelObj = knk[series.savedSlots[i].novel];
-//       const title = novelObj.title;
-//       const chapterIndex = series.savedSlots[i].chapter;
-//       const paragraphIndex = series.savedSlots[i].paragraph;
+const InitDOM = (() => {
+  // Display saved slots
+  const savedSlotsElt = document
+    .getElementById("save-slots")
+    .getElementsByTagName("td");
 
-//       savedSlotsElt[i].textContent = `${title} - Chapter ${chapterIndex}`;
-//     }
-//   }
-// })();
+  const savedSlots = series.getSavedSlots();
+  for (let i = 0; i < savedSlots.length; i++) {
+    if (savedSlots[i] === null) {
+      savedSlotsElt[i].textContent = "empty";
+    } else {
+      const novelObj = seriesData[savedSlots[i].novel];
+      const title: string = novelObj.title;
+      const chapterIndex: number = savedSlots[i].chapter;
+
+      savedSlotsElt[i].textContent = `${title} - Chapter ${chapterIndex}`;
+    }
+  }
+})();
 
 export { GameDOM, GameWindow };

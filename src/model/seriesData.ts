@@ -1,4 +1,4 @@
-const knk = [
+const seriesData = [
   {
     title: "Overlooking View",
     id: "overlooking-view",
@@ -8229,4 +8229,4 @@ const knk = [
   },
 ];
 
-export { knk }
+export { seriesData }

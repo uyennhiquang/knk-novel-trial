@@ -17,6 +17,7 @@ const MenuDOM = (() => {
   const startButton = document.getElementById("button--start");
   const continueButton = document.getElementById("button--continue");
 
+
   const toggleHome = () => {
     homeScreen.classList.toggle("hidden");
   };

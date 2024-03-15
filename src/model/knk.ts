@@ -1,5 +1,5 @@
 import { Howl } from "howler";
-import { knk } from "./novel";
+import { seriesData } from "./seriesData";
 import { GameDOM, GameWindow } from "../view/game-gui";
 
 // Edit line "A person doesn't kill herself without wouldn't kill themselves." in the novel + database
@@ -26,7 +26,7 @@ class Novel {
   sentenceIndex: number;
 
   constructor(novelIndex: number) {
-    this.chapters = knk[novelIndex]["chapters"];
+    this.chapters = seriesData[novelIndex]["chapters"];
     this.currentChapter = null;
     this.currentParagraph = null;
     this.currentParagraphObject = null;
@@ -127,6 +127,10 @@ const series = (() => {
     return chapterChanged;
   };
 
+  const getSavedSlots = (): SavedSlot[] => {
+    return [...savedSlots];
+  };
+
   const setNovel = (value: number): void => {
     novelIndex = value;
     localStorage.setItem("novelIndex", String(novelIndex));
@@ -179,6 +183,7 @@ const series = (() => {
 
           if (novelIndex < novels.length) {
             setCurrentNovel();
+            GameDOM.novelChangedHandler();
 
             currentNovel.sentenceIndex = 0;
             currentNovel.setParagraph(0);
@@ -191,6 +196,7 @@ const series = (() => {
 
     // Setting the current chapter and current paragraph after incrementing (fixing order later)
     if (!isGameOver()) {
+      setCurrentNovel();
       currentNovel.setCurrentChapter();
       currentNovel.setCurrentParagraph();
 
@@ -247,22 +253,14 @@ const series = (() => {
     completedNovels.push(new Novel(value));
   };
 
-  const addSave = (
-    slotIndex: number
-  ): {
-    novel: number;
-    chapter: number;
-    paragraph: number;
-  } => {
-    const savedSlot = {
+  const addSave = (slotIndex: number): void => {
+    const savedSlot: SavedSlot = {
       novel: novelIndex,
       chapter: currentNovel.chapterIndex,
       paragraph: currentNovel.paragraphIndex,
     };
     savedSlots[slotIndex] = savedSlot;
     localStorage.setItem(`slot${slotIndex}`, JSON.stringify(savedSlot));
-
-    return savedSlot;
   };
 
   const removeSave = (slotIndex: number): void => {
@@ -270,13 +268,7 @@ const series = (() => {
   };
 
   const jumpSave = (savedSlot: SavedSlot): void => {
-    setNovel(savedSlot.novel);
-    setCurrentNovel();
-
-    currentNovel.setChapter(savedSlot.chapter);
-
-    currentNovel.setParagraph(savedSlot.paragraph);
-    currentNovel.sentenceIndex = 0;
+   _setGameState(savedSlot.novel, savedSlot.chapter, savedSlot.paragraph);
   };
 
   const _setGameState = (
@@ -317,6 +309,7 @@ const series = (() => {
     getParagraphIndex,
     getSentenceIndex,
     getChapterChanged,
+    getSavedSlots,
 
     setNovel,
     setChapter,
