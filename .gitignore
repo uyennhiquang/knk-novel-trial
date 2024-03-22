@@ -1,4 +1,8 @@
-# assets
+# Compiled code
+dist/src/
+dist/bundle.js
+
+# Assets
 assets/music
 *.zip
 
