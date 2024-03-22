@@ -2,6 +2,7 @@ import { GameDOM } from "./view/game-gui"
 
 import "../assets/styles/reset.css";
 import "../assets/styles/styles.css";
+import { series } from "./model/knk";
 
 const root = document.documentElement;
 if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
@@ -17,7 +18,6 @@ const MenuDOM = (() => {
   const startButton = document.getElementById("button--start");
   const continueButton = document.getElementById("button--continue");
 
-
   const toggleHome = () => {
     homeScreen.classList.toggle("hidden");
   };
@@ -31,4 +31,8 @@ const MenuDOM = (() => {
     toggleHome();
     GameDOM.continueGame();
   });
+
+	if (series.isSeriesAtStartInLocalStorage()) {
+		continueButton.classList.toggle("hidden");
+	}
 })();
