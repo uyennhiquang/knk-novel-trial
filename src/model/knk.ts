@@ -164,6 +164,18 @@ const series = (() => {
     currentSentence = currentNovel.currentParagraph[currentNovel.sentenceIndex];
   };
 
+	const isSeriesAtStartInLocalStorage = (): boolean => {
+    const novelIndex = Number(localStorage.getItem("novelIndex"));
+    const chapterIndex = Number(localStorage.getItem("chapterIndex"));
+    const paragraphIndex = Number(localStorage.getItem("paragraphIndex"));
+
+		return (
+			novelIndex === 0 &&
+			chapterIndex === 0 &&
+			paragraphIndex === 0
+		);
+	}
+
   const checkPositionValidity = (): void => {
     if (currentNovel.sentenceIndex >= currentNovel.currentParagraph.length) {
       currentNovel.sentenceIndex = 0;
@@ -331,6 +343,7 @@ const series = (() => {
     addSave,
     removeSave,
     jumpSave,
+		isSeriesAtStartInLocalStorage,
   };
 })();
 
