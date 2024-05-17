@@ -1,3 +1,4 @@
+# Kara no Kyoukai Sound Novel Trial
 A web-based sound novel for the Kara no Kyoukai series of novel. The web app follows the traditional visual novel workflow (click to display text, save slots); the text being used is my own edit of the translation of the novel series, but if you have a better translation that you would like to propose, feel free to make an issue.
 
 ## Playtest
