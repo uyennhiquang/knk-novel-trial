@@ -4,7 +4,7 @@
 // Continuing the game will start from the next sentence due to the order of playGame()
 
 import { series, Soundtrack } from "../model/knk";
-import { seriesData } from "../model/seriesData";
+import { seriesData } from "../model/seriesDataOld";
 
 let soundtrack = new Soundtrack(series.getNovelIndex());
 
