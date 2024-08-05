@@ -1,6 +1,6 @@
 import { Howl } from "howler";
 import { seriesData } from "./seriesDataOld";
-import { GameDOM, GameWindow } from "../view/game-gui";
+import { GameDOM } from "../view/game-gui";
 
 // Edit line "A person doesn't kill herself without wouldn't kill themselves." in the novel + database
 
