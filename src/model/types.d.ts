@@ -9,10 +9,16 @@ declare global {
   type Chapter = {
     texts: ChapterContent;
   };
+
   type SavedSlot = {
     novel: number;
     chapter: number;
     paragraph: number;
+    time: number;
+  };
+  type SavedSlots = {
+    slots: SavedSlot[];
+    latestSavedIndex: number;
   };
 
   interface NoLoop {

@@ -228,7 +228,6 @@ const GameWindow = (() => {
           GameDOM.speedUp();
         }
       } else {
-        console.log;
         GameDOM.clearText();
         GameDOM.textContainer.appendChild(document.createElement("p"));
         GameDOM.typeWriter(
@@ -297,7 +296,6 @@ const SaveDOM = (() => {
     savedSlotsElt[i].addEventListener("click", () => {
       if (isSaving) {
         series.addSave(i);
-        console.log(series.getSavedSlots());
 
         const novelObj = seriesData[series.getSavedSlots()[i].novel];
         const title = novelObj.title;

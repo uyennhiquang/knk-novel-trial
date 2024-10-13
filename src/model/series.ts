@@ -1,6 +1,10 @@
 import { Novel } from "./novel";
 import { GameDOM } from "../view/game-gui";
 
+/*
+- 10/12/24 - Last sentence is on 1-6-4
+*/
+
 const MAX_SLOTS = 3;
 
 const series = Object.freeze((() => {
@@ -15,11 +19,22 @@ const series = Object.freeze((() => {
 
   let currentSentence: string = "";
 
-  const savedSlots: SavedSlot[] = Array(MAX_SLOTS).fill(null);
+  // const savedSlots: SavedSlot[] = Array(MAX_SLOTS).fill(null);
+  const savedSlots: SavedSlots = {
+    slots: Array(MAX_SLOTS).fill(null),
+    latestSavedIndex: null
+  };
+
+  // Load saved slots from localStorage to current sessions
   for (let i = 0; i < MAX_SLOTS; i++) {
     const localSlot = localStorage.getItem(`slot${i}`);
+    let _maxTime = 0;
     if (typeof localSlot === "string") {
-      savedSlots[i] = JSON.parse(localSlot);
+      savedSlots.slots[i] = JSON.parse(localSlot);
+      if (savedSlots.slots[i].time > _maxTime) {
+        _maxTime = savedSlots.slots[i].time;
+        savedSlots.latestSavedIndex = i;
+      }
     }
   }
 
@@ -63,8 +78,12 @@ const series = Object.freeze((() => {
   };
 
   const getSavedSlots = (): SavedSlot[] => {
-    return [...savedSlots];
+    return [...savedSlots.slots];
   };
+
+  const getLatestSavedIndex = (): number => {
+    return savedSlots.latestSavedIndex
+  }
 
   const setNovel = (value: number): void => {
     novelIndex = value;
@@ -149,6 +168,7 @@ const series = Object.freeze((() => {
 
       setCurrentSentence();
     }
+
   };
 
   const incrementSentence = (): void => {
@@ -205,13 +225,15 @@ const series = Object.freeze((() => {
       novel: novelIndex,
       chapter: currentNovel.chapterIndex,
       paragraph: currentNovel.paragraphIndex,
+      time: Math.round(+new Date()/1000)
     };
-    savedSlots[slotIndex] = savedSlot;
+    savedSlots.slots[slotIndex] = savedSlot;
+    savedSlots.latestSavedIndex = slotIndex;
     localStorage.setItem(`slot${slotIndex}`, JSON.stringify(savedSlot));
   };
 
   const removeSave = (slotIndex: number): void => {
-    delete savedSlots[slotIndex];
+    delete savedSlots.slots[slotIndex];
   };
 
   const jumpSave = (savedSlot: SavedSlot): void => {
@@ -257,6 +279,7 @@ const series = Object.freeze((() => {
     getSentenceIndex,
     getChapterChanged,
     getSavedSlots,
+    getLatestSavedIndex,
 
     setNovel,
     setChapter,
