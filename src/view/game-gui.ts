@@ -115,7 +115,7 @@ const GameDOM = (() => {
   const novelChangedHandler = () => {
     soundtrack.pauseAudio();
     soundtrack = new Soundtrack(series.getNovelIndex());
-  }  
+  };
 
   return {
     gameScreen,
@@ -212,9 +212,9 @@ const GameWindow = (() => {
    */
   const playGame = () => {
     if (GameDOM.playing) {
+      series.checkPositionValidity(); // Has to exist so game doesn't continue on the next sentence when changing paragraph
       if (!series.isGameOver()) {
         if (!GameDOM.running) {
-          series.checkPositionValidity(); // Has to exist so game doesn't continue on the next sentence when changing paragraph
           series.checkEmptyParagraph();
 
           GameDOM.chapterChangedHandler();
@@ -228,12 +228,12 @@ const GameWindow = (() => {
           GameDOM.speedUp();
         }
       } else {
-        console.log;
         GameDOM.clearText();
         GameDOM.textContainer.appendChild(document.createElement("p"));
         GameDOM.typeWriter(
           "You've reached the end of the demo. Thank you for playing."
         );
+        soundtrack.pauseAudio();
         GameDOM.playing = false;
       }
     }
@@ -297,7 +297,6 @@ const SaveDOM = (() => {
     savedSlotsElt[i].addEventListener("click", () => {
       if (isSaving) {
         series.addSave(i);
-        console.log(series.getSavedSlots());
 
         const novelObj = seriesData[series.getSavedSlots()[i].novel];
         const title = novelObj.title;
@@ -307,9 +306,8 @@ const SaveDOM = (() => {
         isSaving = false;
         saveSectionElt.lastChild.textContent = defaultMessage;
 
-      // Bandaid fix when player tries to load while the text is running 
+        // Bandaid fix when player tries to load while the text is running
       } else if (isLoading && !GameDOM.running) {
-        console.log("loading clicked");
         GameDOM.clearText();
         GameDOM.textContainer.appendChild(document.createElement("p"));
 
@@ -320,7 +318,7 @@ const SaveDOM = (() => {
 
         isLoading = false;
         saveSectionElt.lastChild.textContent = defaultMessage;
-        
+
         GameDOM.typeWriter(series.getCurrentSentence());
         soundtrack.playAudio(series.getCurrentParagraphObject());
       }
