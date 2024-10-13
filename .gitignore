@@ -1,6 +1,6 @@
 # Assets
 assets/music
-dist
+dist/bundle.js
 *.zip
 
 # Logs
