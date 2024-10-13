@@ -27,9 +27,9 @@ const series = Object.freeze(
     };
 
     // Load saved slots from localStorage to current sessions
+    let _maxTime = 0;
     for (let i = 0; i < MAX_SLOTS; i++) {
       const localSlot = localStorage.getItem(`slot${i}`);
-      let _maxTime = 0;
       if (typeof localSlot === "string") {
         savedSlots.slots[i] = JSON.parse(localSlot);
         if (savedSlots.slots[i].time > _maxTime) {
@@ -42,7 +42,6 @@ const series = Object.freeze(
     for (let i = 0; i < MAX_NOVELS; i++) {
       novels.push(new Novel(i));
     }
-
     currentNovel = novels[novelIndex];
     currentSentence = currentNovel.currentParagraph[currentNovel.sentenceIndex];
 
@@ -205,8 +204,9 @@ const series = Object.freeze(
       }
     };
 
+    // Checks whether it's game over or not. Has to consider both the current variable and the localStorage one as the former might not be initiated yet
     const isGameOver = (): boolean => {
-      return novelIndex >= novels.length;
+      return novelIndex >= novels.length || Number(localStorage.getItem("novelIndex")) >= novels.length;
     };
 
     const toggleChapterChange = (): void => {
@@ -259,11 +259,21 @@ const series = Object.freeze(
     };
 
     const continueGame = (): void => {
-      const novelIndex = Number(localStorage.getItem("novelIndex"));
-      const chapterIndex = Number(localStorage.getItem("chapterIndex"));
-      const paragraphIndex = Number(localStorage.getItem("paragraphIndex"));
-
-      _setGameState(novelIndex, chapterIndex, paragraphIndex);
+      if (!series.isGameOver()) {
+        _setGameState(
+          Number(localStorage.getItem("novelIndex")),
+          Number(localStorage.getItem("chapterIndex")),
+          Number(localStorage.getItem("paragraphIndex"))
+        );
+      } else if (savedSlots.latestSavedIndex != null) {
+        _setGameState(
+          savedSlots.slots[savedSlots.latestSavedIndex].novel,
+          savedSlots.slots[savedSlots.latestSavedIndex].chapter,
+          savedSlots.slots[savedSlots.latestSavedIndex].paragraph
+        );
+      } else {
+        series.startGame();
+      }
     };
 
     return {
