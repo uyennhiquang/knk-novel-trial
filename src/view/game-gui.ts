@@ -115,7 +115,7 @@ const GameDOM = (() => {
   const novelChangedHandler = () => {
     soundtrack.pauseAudio();
     soundtrack = new Soundtrack(series.getNovelIndex());
-  }  
+  };
 
   return {
     gameScreen,
@@ -305,7 +305,7 @@ const SaveDOM = (() => {
         isSaving = false;
         saveSectionElt.lastChild.textContent = defaultMessage;
 
-      // Bandaid fix when player tries to load while the text is running 
+        // Bandaid fix when player tries to load while the text is running
       } else if (isLoading && !GameDOM.running) {
         console.log("loading clicked");
         GameDOM.clearText();
@@ -318,7 +318,7 @@ const SaveDOM = (() => {
 
         isLoading = false;
         saveSectionElt.lastChild.textContent = defaultMessage;
-        
+
         GameDOM.typeWriter(series.getCurrentSentence());
         soundtrack.playAudio(series.getCurrentParagraphObject());
       }
