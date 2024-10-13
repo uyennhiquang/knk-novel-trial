@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VN Trial</title>
+  </head>
+  <body>
+    <div id="screen--home">
+      <h1>Kara no Kyoukai demo</h1>
+      <button id="button--start">Start</button>
+      <button id="button--continue">Continue</button>
+    </div>
+
+    <div id="screen--game" , class="hidden">
+      <form>
+        <label for="novel">jump to novel</label
+        ><input type="text" name="novel" id="novel" required />
+
+        <label for="chapter">jump to chapter</label
+        ><input type="text" name="chapter" id="chapter" required />
+
+        <label for="paragraph">jump to paragraph</label
+        ><input type="text" name="paragraph" id="paragraph" required />
+
+        <input type="button" value="submit" id="button--paragraph" />
+      </form>
+      <div id="window--text">
+        <div id="container--text"></div>
+      </div>
+      <section id="section--save">
+        <button id="button--save">save</button>
+        <button id="button--load">load</button>
+        <p></p>
+      </section>
+      <table id="save-slots">
+        <tr>
+          <td>empty</td>
+        </tr>
+        <tr>
+          <td>empty</td>
+        </tr>
+        <tr>
+          <td>empty</td>
+        </tr>
+      </table>
+    </div>
+
+    <script src="bundle.js"></script>
+  </body>
+</html>
