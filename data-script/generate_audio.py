@@ -234,7 +234,6 @@ ost = [
     }
 ]
 
-
 def generate_audio():
     for novel_index in range(NOVEL_COUNT):
         current_title = TITLES[novel_index]
@@ -254,18 +253,6 @@ def generate_audio():
                     chapter.append(paragraph)
             novel_dict["content"].append(chapter)
         knk_audio.append(novel_dict)
-
-    # for novel_index in range(NOVEL_COUNT):
-    #     current_novel = knk_audio[novel_index]
-    #     for chapter_index in range(current_novel):
-    #         current_chapter = current_novel[chapter_index]
-    #         for paragraph_index in range(current_chapter):
-    #             current_paragraph = current_chapter[paragraph_index]
-    #             for sentence_index in range(current_paragraph):
-    #                 # temporarily set to first of paragraph for testing
-    #                 if sentence_index != 0:
-    #                     break
-    #                 # Check of
 
     novel_audio_index = 0
     for novel in ost:
