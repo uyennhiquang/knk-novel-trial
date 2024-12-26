@@ -5,20 +5,22 @@ import json
 regex = '(?:(?<=\s|…)|\"|\'|\.\.\.|\w)[^\.\?!;]+[\.\?!;…—]+[\"\']?'
 # regex = re.compile(r"\s*((?:\.{3})?(?:[^\".?!—-]*\"[^\"]+\")*[^\".?!—-]*(?:[.?!]+|\s*[—]))")
 
+
 def chapter(paragraphs):
     return {"texts": paragraphs}
 
 
 TITLES = ("overlooking-view", "murder-speculation-1", "remaining-pain",
-          "the-hollow-shrine", "paradox-paradigm", "fairytale", "murder-spec-2")
+          "the-hollow-shrine", "paradox-paradigm", "fairytale", "murder-speculation-2")
 
+# A dictionary that maps a novel to the number of chapters it has. The primarily usage is for the iterator to know how many chapter text files to iterate over
 TITLES_DICT = {
     TITLES[0]: 6,
     TITLES[1]: 7,
     TITLES[2]: 8,
 }
 
-knk = []
+knk_text = []
 ost = [
     {
         "chapters": [
@@ -234,48 +236,26 @@ ost = [
 
 for novel_index in range(2):
     current_title = TITLES[novel_index]
-    title_dict = {
+    novel_dict = {
         "title": current_title,
-        "chapters": []
+        "content": []
     }
-
     for chapter_index in range(TITLES_DICT[current_title]):
+        chapter = []
         file = f"{current_title}/ch{chapter_index}.txt"
-        paragraphs = []
-        try:
-            chapter_tracks = ost[novel_index]["chapters"][chapter_index]
-        except IndexError:
-            chapter_tracks = []
-
         with open(file) as f:
-            paragraph_index = 0
             for line in f:
-                paragraph = {"sentences": re.findall(
-                    regex, line)}
-                if paragraph_index == 13 and chapter_index == 2:
-                    print(paragraph)
-                paragraphs.append(paragraph)
-
-                audio_id = None
-                for track in chapter_tracks:
-                    if paragraph_index >= track["start"] and paragraph_index <= track["end"]:
-                        if audio_id == None:
-                            audio_id = [track["id"]]
-                        else:
-                            audio_id.append(track["id"])
-
-                if audio_id != None:
-                    paragraph["audioId"] = audio_id
-                paragraph_index += 1
-
-        chapter = {
-            "texts": paragraphs
-        }
-        title_dict["chapters"].append(chapter)
-    knk.append(title_dict)
+                sentences = re.findall(regex, line)
+                paragraph = [{"en": sentence, "jp": ""}
+                             for sentence in sentences]
+                chapter.append(paragraph)
+        novel_dict["content"].append(chapter)
+    knk_text.append(novel_dict)
 
 json_data = {
-    "knk": knk
+    "knk_text": knk_text
 }
-with open("db.json", "w", encoding="utf-8") as f:
+
+
+with open("knk_text.json", "w", encoding="utf-8") as f:
     json.dump(json_data, f, ensure_ascii=False, indent=2)
