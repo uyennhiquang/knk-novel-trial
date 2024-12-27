@@ -9,6 +9,7 @@ import { seriesData } from "../model/seriesData";
 let soundtrack = new Soundtrack(series.getNovelIndex());
 
 console.log(
+  "testing new code",
   "Init (on first load)\n",
   "Novel:",
   series.getNovelIndex(),
@@ -185,7 +186,7 @@ const GameWindow = (() => {
       const p = document.createElement("p");
       const currentParagraphStr = series
         .getCurrentParagraph()
-        .map((sentence) => sentence)
+        .map((sentence: Sentence) => sentence.en)
         .join(" ");
       p.innerHTML = currentParagraphStr;
       GameDOM.textContainer.appendChild(p);
@@ -222,7 +223,7 @@ const GameWindow = (() => {
           if (series.getSentenceIndex() == 0)
             GameWindow.checkForParagraphOverflow();
 
-          soundtrack.playAudio(series.getCurrentParagraphObject());
+          // soundtrack.playAudio(series.getCurrentParagraphObject());
           GameDOM.typeWriter(series.getCurrentSentence());
         } else {
           GameDOM.speedUp();
@@ -320,7 +321,7 @@ const SaveDOM = (() => {
         saveSectionElt.lastChild.textContent = defaultMessage;
 
         GameDOM.typeWriter(series.getCurrentSentence());
-        soundtrack.playAudio(series.getCurrentParagraphObject());
+        // soundtrack.playAudio(series.getCurrentParagraphObject());
       }
     });
   }

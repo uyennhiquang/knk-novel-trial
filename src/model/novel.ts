@@ -1,20 +1,21 @@
-import { seriesData } from "./seriesData";
+// import { seriesData } from "./seriesData";
+import { knk_text } from "./knk_text";
 
 class Novel {
   chapters: Chapter[];
-  currentChapter: ChapterContent;
-  currentParagraph: ParagraphText;
-  currentParagraphObject: Paragraph;
+  currentChapter: Chapter;
+  currentParagraph: Paragraph;
+  currentSentence: Sentence;
 
   chapterIndex: number;
   paragraphIndex: number;
   sentenceIndex: number;
 
   constructor(novelIndex: number) {
-    this.chapters = seriesData[novelIndex]["chapters"];
+    this.chapters = knk_text[novelIndex]["content"];
     this.currentChapter = null;
     this.currentParagraph = null;
-    this.currentParagraphObject = null;
+    this.currentSentence = null;
 
     // Have to set to the program's variable temporarily (without affecting the localStorage) so it doesn't crash
     this.chapterIndex = 0;
@@ -23,25 +24,34 @@ class Novel {
 
     this.setCurrentChapter();
     this.setCurrentParagraph();
+    this.setCurrentSentence();
   }
 
-  setParagraph(value: number): void {
-    this.paragraphIndex = value;
-    localStorage.setItem("paragraphIndex", String(value));
-  }
-
-  setChapter(value: number): void {
+  setChapterIndex(value: number): void {
     this.chapterIndex = value;
     localStorage.setItem("chapterIndex", String(value));
   }
 
+  setParagraphIndex(value: number): void {
+    this.paragraphIndex = value;
+    localStorage.setItem("paragraphIndex", String(value));
+  }
+
+  setSentenceIndex(value: number): void {
+    this.sentenceIndex = value;
+    localStorage.setItem("sentenceIndex", String(value));
+  }
+
   setCurrentChapter(): void {
-    this.currentChapter = this.chapters[this.chapterIndex].texts;
+    this.currentChapter = this.chapters[this.chapterIndex];
   }
 
   setCurrentParagraph(): void {
-    this.currentParagraphObject = this.currentChapter[this.paragraphIndex];
-    this.currentParagraph = this.currentParagraphObject.sentences;
+    this.currentParagraph = this.currentChapter[this.paragraphIndex];
+  }
+
+  setCurrentSentence(): void {
+    this.currentSentence = this.currentParagraph[this.sentenceIndex];
   }
 }
 

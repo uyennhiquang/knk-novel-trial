@@ -1,14 +1,10 @@
 declare global {
-  type ParagraphText = string[];
-  type Paragraph = {
-    audioId?: string[];
-    sentences: ParagraphText;
-  };
-
-  type ChapterContent = Paragraph[];
-  type Chapter = {
-    texts: ChapterContent;
-  };
+  type Sentence = {
+    en: string;
+    jp: string;
+  }
+  type Paragraph = Sentence[]
+  type Chapter = Paragraph[]
 
   type SavedSlot = {
     novel: number;

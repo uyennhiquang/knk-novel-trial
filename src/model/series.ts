@@ -18,7 +18,6 @@ const series = Object.freeze(
     let currentNovel: Novel = null;
     let chapterChanged: boolean = false;
 
-    let currentSentence: string = "";
 
     // const savedSlots: SavedSlot[] = Array(MAX_SLOTS).fill(null);
     const savedSlots: SavedSlots = {
@@ -43,18 +42,13 @@ const series = Object.freeze(
       novels.push(new Novel(i));
     }
     currentNovel = novels[novelIndex];
-    currentSentence = currentNovel.currentParagraph[currentNovel.sentenceIndex];
 
-    const getCurrentParagraphObject = (): Paragraph => {
-      return currentNovel.currentParagraphObject;
-    };
-
-    const getCurrentParagraph = (): ParagraphText => {
+    const getCurrentParagraph = (): Paragraph => {
       return currentNovel.currentParagraph;
     };
 
     const getCurrentSentence = (): string => {
-      return currentSentence;
+      return currentNovel.currentSentence.en; // Placeholder for now
     };
 
     const getNovelIndex = (): number => {
@@ -91,11 +85,11 @@ const series = Object.freeze(
     };
 
     const setChapter = (value: number): void => {
-      currentNovel.setChapter(value);
+      currentNovel.setChapterIndex(value);
     };
 
     const setParagraph = (value: number): void => {
-      currentNovel.setParagraph(value);
+      currentNovel.setParagraphIndex(value);
     };
 
     const setSentence = (value: number): void => {
@@ -115,8 +109,9 @@ const series = Object.freeze(
     };
 
     const setCurrentSentence = (): void => {
-      currentSentence =
-        currentNovel.currentParagraph[currentNovel.sentenceIndex];
+      // currentSentence =
+        // currentNovel.currentParagraph[currentNovel.sentenceIndex];
+      currentNovel.setCurrentSentence();
     };
 
     const isSeriesAtStartInLocalStorage = (): boolean => {
@@ -130,7 +125,7 @@ const series = Object.freeze(
     const checkPositionValidity = (): void => {
       if (currentNovel.sentenceIndex >= currentNovel.currentParagraph.length) {
         currentNovel.sentenceIndex = 0;
-        currentNovel.setParagraph(currentNovel.paragraphIndex + 1);
+        currentNovel.setParagraphIndex(currentNovel.paragraphIndex + 1);
 
         GameDOM.incrTextContainerIndex();
         // GameDOM.textContainer.appendChild(document.createElement("p"));
@@ -138,8 +133,8 @@ const series = Object.freeze(
         // Checks if starting a new paragraph would be out of paragraphIndex for the current chapter
         if (currentNovel.paragraphIndex >= currentNovel.currentChapter.length) {
           currentNovel.sentenceIndex = 0;
-          currentNovel.setParagraph(0);
-          currentNovel.setChapter(currentNovel.chapterIndex + 1);
+          currentNovel.setParagraphIndex(0);
+          currentNovel.setChapterIndex(currentNovel.chapterIndex + 1);
 
           if (currentNovel.chapterIndex >= currentNovel.chapters.length) {
             setNovel(novelIndex + 1);
@@ -149,8 +144,8 @@ const series = Object.freeze(
               GameDOM.novelChangedHandler();
 
               currentNovel.sentenceIndex = 0;
-              currentNovel.setParagraph(0);
-              currentNovel.setChapter(0);
+              currentNovel.setParagraphIndex(0);
+              currentNovel.setChapterIndex(0);
             }
           }
           toggleChapterChange();
@@ -194,10 +189,10 @@ const series = Object.freeze(
         setNovel(newNovelIndex);
         setCurrentNovel();
 
-        currentNovel.setChapter(newChapterIndex);
+        currentNovel.setChapterIndex(newChapterIndex);
         currentNovel.setCurrentChapter();
 
-        currentNovel.setParagraph(newParagraphIndex);
+        currentNovel.setParagraphIndex(newParagraphIndex);
         currentNovel.setCurrentParagraph();
 
         setCurrentSentence();
@@ -245,8 +240,8 @@ const series = Object.freeze(
       setNovel(novelIndex);
       setCurrentNovel();
 
-      currentNovel.setChapter(chapterIndex);
-      currentNovel.setParagraph(paragraphIndex);
+      currentNovel.setChapterIndex(chapterIndex);
+      currentNovel.setParagraphIndex(paragraphIndex);
       currentNovel.sentenceIndex = 0;
 
       currentNovel.setCurrentChapter();
@@ -277,7 +272,6 @@ const series = Object.freeze(
     };
 
     return {
-      getCurrentParagraphObject,
       getCurrentParagraph,
       getCurrentSentence,
       getNovelIndex,
