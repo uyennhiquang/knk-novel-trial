@@ -6,4 +6,4 @@ If you would like to playtest this on your local machine, download the `beta` br
 ### Windows
 1. Create an empty `.bat` file anywhere (this will be your executable).
 2. Inside the script, add the following line:  `"<path_to_chrome_browser.exe>" --user-data-dir="C://Chrome dev session" --disable-web-security "<path_to_index.html>"`.
-2b. Optionally, you can change the icon of the executable.
+3. Optionally, you can change the icon of the executable.
