@@ -16,6 +16,13 @@ const series = Object.freeze(
     let novelIndex: number = 0;
 
     let currentNovel: Novel = null;
+    let currentPosition: Position = {
+      novel: 0,
+      chapter: 0,
+      paragraph: 0,
+      sentence: 0,
+    };
+    
     let chapterChanged: boolean = false;
 
 
@@ -49,6 +56,10 @@ const series = Object.freeze(
 
     const getCurrentSentence = (): string => {
       return currentNovel.currentSentence.en; // Placeholder for now
+    };
+
+    const getCurrentPosition = (): Position => {
+      return currentPosition; 
     };
 
     const getNovelIndex = (): number => {
@@ -113,6 +124,13 @@ const series = Object.freeze(
         // currentNovel.currentParagraph[currentNovel.sentenceIndex];
       currentNovel.setCurrentSentence();
     };
+
+    const setCurrentPosition = (): void => {
+      currentPosition.novel = getNovelIndex();
+      currentPosition.chapter = getChapterIndex();
+      currentPosition.paragraph = getParagraphIndex();
+      currentPosition.sentence = getSentenceIndex();
+    }
 
     const isSeriesAtStartInLocalStorage = (): boolean => {
       const novelIndex = Number(localStorage.getItem("novelIndex"));
@@ -274,6 +292,7 @@ const series = Object.freeze(
     return {
       getCurrentParagraph,
       getCurrentSentence,
+      getCurrentPosition,
       getNovelIndex,
       getChapterIndex,
       getParagraphIndex,
@@ -290,6 +309,7 @@ const series = Object.freeze(
       setCurrentChapter,
       setCurrentParagraph,
       setCurrentSentence,
+      setCurrentPosition,
 
       startGame,
       continueGame,

@@ -5,6 +5,12 @@ declare global {
   }
   type Paragraph = Sentence[]
   type Chapter = Paragraph[]
+  type Position = {
+    novel: number;
+    chapter: number;
+    paragraph: number;
+    sentence: number;
+  }
 
   type SavedSlot = {
     novel: number;
