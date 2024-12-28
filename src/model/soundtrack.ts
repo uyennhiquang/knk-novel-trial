@@ -1,80 +1,61 @@
-/* The Soundtrack class takes in a novelIndex to tell the Track function which folder to pull the tracks from. Besides that, it also contains a noLoop property, which is a hashmap to be fed to the Track class, so that the Track constructor knows which track not to loop */
+/* The Soundtrack class takes in a novelIndex to tell the Track function which folder to pull the tracks from. */
 
 import { Track } from "./track";
-import { TrackList } from "./trackList";
+import { knk_audio } from "./knk_audio";
 
 class Soundtrack {
-  noLoop: NoLoop;
-  currentTrackList: TrackList;
+  currentTrackList: Track[];
   novelIndex: number;
 
   constructor(novelIndex: number) {
-    this.noLoop = {
-      0: ["01"],
-      1: ["07", "16", "18"],
-    };
     this.novelIndex = novelIndex;
-    this.currentTrackList = new TrackList(
-      this.novelIndex,
-      [],
-      this.noLoop[this.novelIndex]
-    );
+    this.currentTrackList = [];
   }
+  playAudio(position: Position) {
+    // Does the current position match with one in our list of tracks to stop from the audio db?
+    const sentenceAudioInfo =
+      knk_audio[position.novel].content[position.chapter][position.paragraph][
+        position.sentence
+      ];
 
-  playAudio(paragraphObject: Paragraph) {
-    if (paragraphObject.hasOwnProperty("audioId")) {
-      if (!this.currentTrackList.playing) {
-        this.currentTrackList = new TrackList(
-          this.novelIndex,
-          paragraphObject.audioId,
-          this.noLoop[this.novelIndex]
+    if ("end" in sentenceAudioInfo) {
+      const sentenceAudioEnd = sentenceAudioInfo.end;
+      sentenceAudioEnd.forEach((audioInfo) => {
+        this.currentTrackList.filter((currentTrack) => {
+          if (currentTrack.audioId == audioInfo.audio_id) {
+            currentTrack.stop();
+            return false;
+          }
+        });
+      });
+    }
+
+    // Reading from the audio db, are we currently in a position where a new track is supposed to be played?
+    if ("start" in sentenceAudioInfo) {
+      const sentenceAudioEnd = sentenceAudioInfo.start;
+      sentenceAudioEnd.forEach((audioInfo) => {
+        const newTrack = new Track(
+          position.novel,
+          audioInfo.audio_id,
+          audioInfo.vol,
+          audioInfo.loop
         );
-        this.currentTrackList.playTrackList();
-      } else {
-        let unique = true;
-
-        // TODO: Add a comment explaining why the 2 for-loops below are needed
-        this.currentTrackList.trackIds.forEach((id) => {
-          if (!paragraphObject.audioId.includes(id)) {
-            this.currentTrackList.removeTrackWithId(id);
-          } else {
-            unique = false;
-          }
-        });
-
-        paragraphObject.audioId.forEach((id) => {
-          if (!this.currentTrackList.trackIds.includes(id)) {
-            this.currentTrackList.addToTrackList(
-              new Track(this.novelIndex, id, this.noLoop[this.novelIndex])
-            );
-          } else {
-            unique = false;
-          }
-        });
-
-        if (unique) {
-          this.currentTrackList.pauseTrackList();
-
-          this.currentTrackList = new TrackList(
-            this.novelIndex,
-            paragraphObject.audioId,
-            this.noLoop[this.novelIndex]
-          );
-
-          this.currentTrackList.playTrackList();
-        }
-      }
-    } else if (
-      this.currentTrackList.trackIds.length !== 0 &&
-      this.currentTrackList.playing
-    ) {
-      this.currentTrackList.pauseTrackList();
-      this.currentTrackList.clearTrackList();
+        newTrack.play();
+        this.currentTrackList.push(newTrack);
+      });
     }
   }
 
   pauseAudio(): void {
-    this.currentTrackList.pauseTrackList();
+    this.currentTrackList.forEach((currentTrack) => {
+      currentTrack.stop();
+    });
+  }
+
+  playAllAudio(): void {
+    this.currentTrackList.forEach((currentTrack) => {
+      currentTrack.play();
+    });
   }
 }
 

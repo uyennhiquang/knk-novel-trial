@@ -173,10 +173,11 @@ const series = Object.freeze(
       // Setting the current chapter and current paragraph after incrementing (fixing order later)
       if (!isGameOver()) {
         setCurrentNovel();
-        currentNovel.setCurrentChapter();
-        currentNovel.setCurrentParagraph();
+        setCurrentChapter();
+        setCurrentParagraph();
 
         setCurrentSentence();
+        setCurrentPosition();
       }
     };
 
@@ -184,6 +185,7 @@ const series = Object.freeze(
       currentNovel.sentenceIndex++;
     };
     const checkEmptyParagraph = (): void => {
+
       while (currentNovel.currentParagraph.length === 0) {
         GameDOM.clearText();
 
@@ -214,6 +216,7 @@ const series = Object.freeze(
         currentNovel.setCurrentParagraph();
 
         setCurrentSentence();
+        setCurrentPosition();
       }
     };
 
@@ -261,10 +264,9 @@ const series = Object.freeze(
       currentNovel.setChapterIndex(chapterIndex);
       currentNovel.setParagraphIndex(paragraphIndex);
       currentNovel.sentenceIndex = 0;
-
-      currentNovel.setCurrentChapter();
-      currentNovel.setCurrentParagraph();
-      setCurrentSentence();
+      
+      checkPositionValidity();
+      checkEmptyParagraph();
     };
 
     const startGame = (): void => {

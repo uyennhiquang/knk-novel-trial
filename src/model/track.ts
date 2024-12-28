@@ -21,6 +21,14 @@ class Track {
     // console.log(this.audioId, this.audio);
     // });
   }
+
+  play(): void {
+    this.audio.play();
+  }
+
+  stop(): void {
+    this.audio.stop();
+  }
 }
 
 export { Track };

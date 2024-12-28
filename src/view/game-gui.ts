@@ -4,7 +4,7 @@
 // Continuing the game will start from the next sentence due to the order of playGame()
 
 import { series, Soundtrack } from "../model/knk";
-import { seriesData } from "../model/seriesData";
+import { seriesData } from "../model/seriesData-old";
 
 let soundtrack = new Soundtrack(series.getNovelIndex());
 
@@ -48,16 +48,16 @@ const GameDOM = (() => {
   };
 
   const startGame = () => {
-    playGame();
     series.startGame();
+    playGame();
 
     soundtrack.pauseAudio();
     soundtrack = new Soundtrack(series.getNovelIndex());
   };
 
   const continueGame = () => {
-    playGame();
     series.continueGame();
+    playGame();
 
     soundtrack.pauseAudio();
     soundtrack = new Soundtrack(series.getNovelIndex());
@@ -162,6 +162,8 @@ const ParagraphJump = (() => {
 
     series.setSentence(0);
     series.setCurrentSentence();
+
+    // loads audio?
   };
 
   buttonElt.addEventListener("click", () => {
@@ -217,13 +219,12 @@ const GameWindow = (() => {
       if (!series.isGameOver()) {
         if (!GameDOM.running) {
           series.checkEmptyParagraph();
-
           GameDOM.chapterChangedHandler();
 
           if (series.getSentenceIndex() == 0)
             GameWindow.checkForParagraphOverflow();
 
-          // soundtrack.playAudio(series.getCurrentParagraphObject());
+          soundtrack.playAudio(series.getCurrentPosition());
           GameDOM.typeWriter(series.getCurrentSentence());
         } else {
           GameDOM.speedUp();

@@ -23,8 +23,5 @@ declare global {
     latestSavedIndex: number;
   };
 
-  interface NoLoop {
-    [key: number]: string[];
-  }
 }
 export {};
