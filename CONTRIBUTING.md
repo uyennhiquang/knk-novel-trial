@@ -28,6 +28,7 @@ TBD
 
 ## Making changes
 As previously mentioned, be sure to let me know if you make any changes, and what files you plan on making the changes on. The typical procedure that I follow is as follows:
+
 0. If there is already a branch for the change you are making, clone it. **Only make any changes on this branch**.
 1. If there is not, clone the main branch, and create a new branch to work on.
 2. Code, commit and push on this branch.
