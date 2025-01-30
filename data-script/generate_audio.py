@@ -1,9 +1,9 @@
 import re
 import json
 
-# regex = '(?:(?<=\s|\"|\'|…|.)|^...)[^\.\?!;]+[\.\?!;…]+[\"\']?'
-regex = '(?:(?<=\s|…)|\"|\'|\.\.\.|\w)[^\.\?!;]+[\.\?!;…—]+[\"\']?'
-# regex = re.compile(r"\s*((?:\.{3})?(?:[^\".?!—-]*\"[^\"]+\")*[^\".?!—-]*(?:[.?!]+|\s*[—]))")
+# regex = '(?:(?<=\s|\"|\'|�c|.)|^...)[^\.\?!;]+[\.\?!;�c]+[\"\']?'
+# regex = '(?:(?<=\s|�c)|\"|\'|\.\.\.|\w)[^\.\?!;]+[\.\?!;�c?]+[\"\']?'
+# regex = re.compile(r"\s*((?:\.{3})?(?:[^\".?!?-]*\"[^\"]+\")*[^\".?!?-]*(?:[.?!]+|\s*[?]))")
 
 TITLES = ("overlooking-view", "murder-speculation-1", "remaining-pain",
           "the-hollow-shrine", "paradox-paradigm", "fairytale", "murder-speculation-2")
